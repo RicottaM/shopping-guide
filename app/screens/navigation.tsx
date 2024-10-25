@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Button, FlatList, Text, StyleSheet } from 'react-native';
 import { useBluetoothService } from '../hooks/useBluetoothService';
 import positionService from '../services/PositionService';
-import { ScannedDevice } from '../types/ScannedDevice';
 
 export default function BluetoothScanner() {
   const { devices, isScanning, scanDevices } = useBluetoothService();
