@@ -12,3 +12,4 @@ storeRouter.get('/:id', storeController.getById);
 storeRouter.post('/', storeController.create);
 storeRouter.put('/:id', storeController.update);
 storeRouter.delete('/:id', storeController.delete);
+storeRouter.get('/:storeId/categories', storeController.getStoreCategories);
