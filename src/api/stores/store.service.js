@@ -67,8 +67,8 @@ export const storeService = {
     getStoreCategories: async (id) => {
         const categories = await client.query(
             `SELECT c.category_id, c.category_name, c.section_id FROM categories c
-            JOIN store_categories sc ON c.category_id = sc.category_id
-            WHERE sc.store_id = $1;`,
+            JOIN sections s ON c.section_id = s.section_id
+            WHERE s.store_id = $1;`,
             [id]
         );
 
