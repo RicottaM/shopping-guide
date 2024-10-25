@@ -64,4 +64,18 @@ export const storeService = {
             store: store.rows[0]
         };
     },
+    getStoreCategories: async (id) => {
+        const categories = await client.query(
+            `SELECT c.category_id, c.category_name, c.section_id FROM categories c
+            JOIN store_categories sc ON c.category_id = sc.category_id
+            WHERE sc.store_id = $1;`,
+            [id]
+        );
+
+        if (!categories.rows.length) {
+            throw new ErrorWithStatus(`Couldn't find any categories for store with given id: ${id}.`, 404);
+        }
+
+        return categories.rows;
+    }
 };

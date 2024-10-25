@@ -44,4 +44,13 @@ export const storeController = {
             next(error);
         }
     },
+    getStoreCategories: async (req, res, next) => {
+        try {
+            const storeId = req.params.storeId;
+            const categories = await storeService.getStoreCategories(storeId);
+            res.json(categories);
+        } catch (error) {
+            next(error);
+        }
+    },
 };

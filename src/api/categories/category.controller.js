@@ -64,15 +64,4 @@ export const categoryController = {
             next(error);
         }
     },
-    getCategorybyStoreId: async (req, res, next) => {
-        try {
-            const storeId = req.params.storeId;
-
-            const categories = await categoryService.getByStoreId(storeId);
-
-            res.json(categories);
-        } catch (error) {
-            next(error);
-        }
-    },
 };
