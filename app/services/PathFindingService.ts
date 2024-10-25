@@ -4,14 +4,53 @@ import { Section } from "../models/section.model";
 
 class PathFindingService {
     edges: Edge[] = [
-        { v1: 1, v2: 3, weight: 1 },
-        { v1: 3, v2: 4, weight: 2 },
-        { v1: 2, v2: 4, weight: 1 },
-        { v1: 4, v2: 5, weight: 2 },
-        { v1: 5, v2: 6, weight: 2 },
-        { v1: 6, v2: 7, weight: 1 },
+        // Alejki pionowe
+        { v1: 1, v2: 9, weight: 2 },
+        { v1: 2, v2: 10, weight: 1 },
+        { v1: 3, v2: 11, weight: 2 },
+        { v1: 4, v2: 12, weight: 1 },
+        { v1: 5, v2: 13, weight: 2 },
+        { v1: 6, v2: 14, weight: 1 },
+        { v1: 7, v2: 15, weight: 2 },
+        { v1: 8, v2: 16, weight: 1 },
+        { v1: 9, v2: 17, weight: 1 },
+        { v1: 10, v2: 18, weight: 2 },
+        { v1: 11, v2: 19, weight: 1 },
+        { v1: 12, v2: 20, weight: 2 },
+        { v1: 13, v2: 21, weight: 1 },
+        { v1: 14, v2: 22, weight: 3 },
+        { v1: 15, v2: 23, weight: 2 },
+        { v1: 16, v2: 24, weight: 1 },
+        // Alejki poziome
+        { v1: 1, v2: 2, weight: 3 },
+        { v1: 2, v2: 3, weight: 3 },
+        { v1: 3, v2: 4, weight: 3 },
+        { v1: 4, v2: 5, weight: 3 },
+        { v1: 5, v2: 6, weight: 3 },
+        { v1: 6, v2: 7, weight: 3 },
+        { v1: 7, v2: 8, weight: 3 },
+        { v1: 9, v2: 10, weight: 2 },
+        { v1: 10, v2: 11, weight: 3 },
+        { v1: 11, v2: 12, weight: 3 },
+        { v1: 12, v2: 13, weight: 3 },
+        { v1: 13, v2: 14, weight: 3 },
+        { v1: 14, v2: 15, weight: 3 },
+        { v1: 15, v2: 16, weight: 3 },
+        { v1: 17, v2: 18, weight: 2 },
+        { v1: 18, v2: 19, weight: 3 },
+        { v1: 19, v2: 20, weight: 3 },
+        { v1: 20, v2: 21, weight: 3 },
+        { v1: 21, v2: 22, weight: 3 },
+        { v1: 22, v2: 23, weight: 3 },
+        { v1: 23, v2: 24, weight: 3 },
+        { v1: 25, v2: 26, weight: 2 },
+        { v1: 26, v2: 27, weight: 3 },
+        { v1: 27, v2: 28, weight: 3 },
+        { v1: 28, v2: 29, weight: 3 },
+        { v1: 29, v2: 30, weight: 3 },
+        { v1: 30, v2: 31, weight: 3 },
+        { v1: 31, v2: 32, weight: 3 }
     ];
-
     graph: Graph = {};
 
     constructor() { }
