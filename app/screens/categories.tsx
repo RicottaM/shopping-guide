@@ -25,7 +25,7 @@ export default function Categories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(process.env.REACT_APP_API_URL + '/categories');
+        const response = await fetch('http://192.168.1.10:3000' + '/categories');
         const data = await response.json();
 
         setCategories(data);

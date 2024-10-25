@@ -24,7 +24,7 @@ export default function Login() {
   }, [navigation]);
 
   const handleLogin = async () => {
-    const response = await fetch(process.env.REACT_APP_API_URL + '/auth/login', {
+    const response = await fetch('http://192.168.1.10:3000' + '/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

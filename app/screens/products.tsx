@@ -32,7 +32,7 @@ export default function Products() {
   useEffect(() => {
     const fetchProductsByCategory = async () => {
       try {
-        const response = await fetch(process.env.REACT_APP_API_URL + `/products/category/${categoryId}`);
+        const response = await fetch('http://192.168.1.10:3000' + `/products/category/${categoryId}`);
         const data = await response.json();
 
         setProducts(data);
@@ -44,7 +44,7 @@ export default function Products() {
 
     const fetchUnits = async () => {
       try {
-        const response = await fetch(process.env.REACT_APP_API_URL + `/units`);
+        const response = await fetch('http://192.168.1.10:3000' + `/units`);
         const data = await response.json();
 
         setUnits(data);
@@ -107,7 +107,7 @@ export default function Products() {
     }
 
     try {
-      const carts = await fetch(process.env.REACT_APP_API_URL + `/carts`);
+      const carts = await fetch('http://192.168.1.10:3000' + `/carts`);
       const cartsData = await carts.json();
       const userId = await getAppData('userId');
       const userCart = cartsData.find((cart: CartModel) => cart.user_id === userId);
@@ -118,7 +118,7 @@ export default function Products() {
         quantity: quantity,
       };
 
-      const response = await fetch(process.env.REACT_APP_API_URL + '/cart-items', {
+      const response = await fetch('http://192.168.1.10:3000' + '/cart-items', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

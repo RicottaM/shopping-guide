@@ -36,7 +36,7 @@ export default function User() {
   }
 
   const logoutUser = async () => {
-    await fetch(process.env.REACT_APP_API_URL + '/auth/logout');
+    await fetch('http://192.168.1.10:3000' + '/auth/logout');
   };
 
   const deleteUserData = async () => {

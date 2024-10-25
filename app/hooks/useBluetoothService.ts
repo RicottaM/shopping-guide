@@ -2,9 +2,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Device } from 'react-native-ble-plx';
 import { Platform, PermissionsAndroid } from 'react-native';
-import { ScannedDevice } from '../types/ScannedDevice';
 import positionService from '../services/PositionService';
 import bleManager from '../BleManagerInstance'; // Importuj singletons
+import { ScannedDevice } from '../types/ScannedDevice';
 
 export function useBluetoothService() {
     const [devices, setDevices] = useState<ScannedDevice[]>([]);
@@ -73,14 +73,14 @@ export function useBluetoothService() {
                         deviceSetRef.current.add(uuid);
                         setDevices((prevDevices) => [
                             ...prevDevices,
-                            { device: scannedDevice, filteredRssi: scannedDevice.rssi ?? 0 },
+                            { device: scannedDevice, filteredRssi: scannedDevice.rssi ?? 0, id: scannedDevice.id },
                         ]);
                     } else {
                         // Aktualizuj RSSI
                         setDevices((prevDevices) =>
                             prevDevices.map((scanned) =>
                                 scanned.device.id === uuid
-                                    ? { ...scanned, filteredRssi: scannedDevice.rssi ?? scanned.filteredRssi }
+                                    ? { ...scanned, filteredRssi: scannedDevice.rssi ?? scanned.filteredRssi, id: scanned.device.id }
                                     : scanned,
                             ),
                         );
