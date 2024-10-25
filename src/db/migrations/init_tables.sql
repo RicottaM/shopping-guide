@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS stores CASCADE;
 DROP TABLE IF EXISTS cart_items CASCADE;
 DROP TABLE IF EXISTS carts CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
@@ -6,9 +7,18 @@ DROP TABLE IF EXISTS units CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS sections CASCADE;
 
+CREATE TABLE stores (
+    store_id SERIAL PRIMARY KEY,
+    store_name VARCHAR(255) NOT NULL,
+    latitude VARCHAR(255) NOT NULL,
+    longitude VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL
+);
+
 CREATE TABLE sections (
     section_id SERIAL PRIMARY KEY,
-    section_name VARCHAR(255) NOT NULL
+    section_name VARCHAR(255) NOT NULL,
+    store_id INT REFERENCES stores(store_id) ON DELETE CASCADE
 );
 
 CREATE TABLE categories (

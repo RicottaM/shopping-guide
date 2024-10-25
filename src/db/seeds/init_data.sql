@@ -5,13 +5,22 @@ DELETE FROM products;
 DELETE FROM units;
 DELETE FROM categories;
 DELETE FROM sections;
+DELETE FROM stores;
+
+INSERT INTO stores (store_name, latitude, longitude, city) VALUES
+('Downtown Supermarket', '40.7128', '-74.0060', 'Gdansk'),
+('Uptown Grocery', '40.7831', '73.9712', 'Gdansk'),
+('Midtown Market', '40.7549', '73.9840', 'Gdansk'),
+('East Side Shop', '40.7614', '73.9776', 'Gdansk'),
+('West End Store', '40.7736', '73.9566', 'Gdansk');
 
 -- Sections (20 examples)
-INSERT INTO sections (section_name) VALUES
-('Produce'), ('Dairy'), ('Bakery'), ('Meat & Seafood'), ('Frozen Foods'),
-('Beverages'), ('Snacks'), ('Household'), ('Personal Care'), ('Pet Supplies'),
-('Canned & Jarred'), ('Condiments & Sauces'), ('Grains & Pasta'), ('Baking Supplies'), ('International Foods'),
-('Health & Wellness'), ('Baby Care'), ('Office Supplies'), ('Electronics'), ('Outdoor Living');
+INSERT INTO sections (section_name, store_id) VALUES
+('Produce', 1), ('Dairy', 1), ('Bakery', 1), ('Meat & Seafood', 1), ('Frozen Foods', 1),
+('Beverages', 2), ('Snacks', 2), ('Household', 2), ('Personal Care', 2), ('Pet Supplies', 2),
+('Canned & Jarred', 3), ('Condiments & Sauces', 3), ('Grains & Pasta', 3), ('Baking Supplies', 3), ('International Foods', 3),
+('Health & Wellness', 4), ('Baby Care', 4), ('Office Supplies', 4), ('Electronics', 4), ('Outdoor Living', 5);
+
 
 -- Units (10 examples)
 INSERT INTO units (unit_name, unit_symbol) VALUES
