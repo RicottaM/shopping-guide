@@ -8,6 +8,7 @@ import { CartModel } from '../models/cart.model';
 import { useGetAppData } from '../hooks/useGetAppData';
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -138,6 +139,7 @@ export default function Products() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <View style={styles.searchContainer}>
         <TextInput style={styles.searchInput} placeholder="Search products" value={searchQuery} onChangeText={handleSearch} selectionColor="#013b3d" />
         <FontAwesome5 name="search" size={22} color="#013b3d" style={styles.searchIcon} />

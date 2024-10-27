@@ -8,6 +8,7 @@ import { useSaveAppData } from '../hooks/useSaveAppData';
 import { Store } from '../models/store.model';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { Screens } from '../enum/screens';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Map() {
   const navigation = useNavigation();
@@ -64,6 +65,7 @@ export default function Map() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <TouchableOpacity style={styles.backButtonContainer} onPress={() => useRouteChange(Screens.Categories)}>
         <MaterialIcons name="arrow-back-ios" size={32} color="#013b3d" />
       </TouchableOpacity>

@@ -7,6 +7,7 @@ import { CartItem } from '../models/cartItem.model';
 import { Product } from '../models/product.model';
 import { CartModel } from '../models/cart.model';
 import { useGetAppData } from '../hooks/useGetAppData';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Code() {
   const navigation = useNavigation();
@@ -71,6 +72,7 @@ export default function Code() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <TouchableOpacity style={styles.backButtonContainer} onPress={() => router.back()}>
         <MaterialIcons name="arrow-back-ios" size={32} color="#013b3d" />
       </TouchableOpacity>

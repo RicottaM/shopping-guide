@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import TestSvg from '../../assets/svg/test.svg';
 import { Screens } from '../enum/screens';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Navigation() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function Navigation() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <View style={styles.mapContainer}>
         <TestSvg width={200} height={200} />
       </View>

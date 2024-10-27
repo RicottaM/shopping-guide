@@ -7,6 +7,7 @@ import { Screens } from '../enum/screens';
 import { useGetAppData } from '../hooks/useGetAppData';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { ChatMessage } from '../models/chatMessage.model';
+import ChatBubble from '../components/ChatBubble';
 
 export default function User() {
   const [username, setUsername] = useState('');
@@ -51,7 +52,6 @@ export default function User() {
     setMessages([...messages, { text: inputText, sender: 'user' }]);
     setInputText('');
 
-    // Przykładowa odpowiedź bota
     setTimeout(() => {
       setMessages((prevMessages) => [...prevMessages, { text: 'To jest odpowiedź bota.', sender: 'bot' }]);
     }, 1000);
@@ -59,6 +59,7 @@ export default function User() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <View style={styles.header}>
         <Text style={styles.userName}>Hi, {username}!</Text>
         <TouchableOpacity style={styles.logOutContainer} onPress={handleLogout}>
