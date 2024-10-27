@@ -39,7 +39,7 @@ export default function Cart() {
         try {
           const response = await fetch(`http://localhost:3000/cart-items`);
           const data = (await response.json()) || [];
-          const userCartItems = data?.filter((cartItem: CartItem) => cartItem.cart_id === userCart.cart_id);
+          const userCartItems = data?.filter((cartItem: CartItem) => cartItem?.cart_id === userCart?.cart_id);
 
           setCartItems(userCartItems);
         } catch (error) {
@@ -139,17 +139,18 @@ export default function Cart() {
       </View>
 
       <ScrollView contentContainerStyle={styles.gridContainer}>
-        {filteredProducts.map((product: Product, index: number) => (
-          <View key={index} style={styles.gridItem}>
-            <View style={styles.productNameContainer}>
-              <Text style={styles.productName}>{product.name}</Text>
+        {filteredProducts &&
+          filteredProducts.map((product: Product, index: number) => (
+            <View key={index} style={styles.gridItem}>
+              <View style={styles.productNameContainer}>
+                <Text style={styles.productName}>{product.name}</Text>
+              </View>
+              <Text style={styles.productText}>{getProductFullPrice(product) + ' $'}</Text>
+              <Text style={styles.productText} onPress={() => removeFromCart(product)}>
+                <Feather name="trash" size={26} color="#013b3d" style={styles.searchIcon} />
+              </Text>
             </View>
-            <Text style={styles.productText}>{getProductFullPrice(product) + ' $'}</Text>
-            <Text style={styles.productText} onPress={() => removeFromCart(product)}>
-              <Feather name="trash" size={26} color="#013b3d" style={styles.searchIcon} />
-            </Text>
-          </View>
-        ))}
+          ))}
       </ScrollView>
 
       <View style={styles.navbar}>

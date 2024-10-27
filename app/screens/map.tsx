@@ -6,9 +6,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useSaveAppData } from '../hooks/useSaveAppData';
 import { Store } from '../models/store.model';
+import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import { Screens } from '../enum/screens';
 
 export default function Map() {
-  const router = useRouter();
   const navigation = useNavigation();
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<Store>();
@@ -20,6 +21,7 @@ export default function Map() {
   });
 
   const saveAppData = useSaveAppData();
+  const useRouteChange = useHandleRouteChange();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -62,7 +64,7 @@ export default function Map() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButtonContainer} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButtonContainer} onPress={() => useRouteChange(Screens.Categories)}>
         <MaterialIcons name="arrow-back-ios" size={32} color="#013b3d" />
       </TouchableOpacity>
 

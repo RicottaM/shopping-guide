@@ -6,6 +6,8 @@ import * as SecureStore from 'expo-secure-store';
 import { useNavigation, useRouter } from 'expo-router';
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import { useGetAppData } from '../hooks/useGetAppData';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Categories() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -15,6 +17,7 @@ export default function Categories() {
   const navigation = useNavigation();
 
   const handleRouteChange = useHandleRouteChange();
+  const getAppData = useGetAppData();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -25,7 +28,8 @@ export default function Categories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:3000/categories');
+        const storeId = await getAppData('selectedStoreId');
+        const response = await fetch(`http://localhost:3000/stores/${storeId}/categories`);
         const data = await response.json();
 
         setCategories(data);
@@ -52,17 +56,19 @@ export default function Categories() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <View style={styles.searchContainer}>
         <TextInput style={styles.searchInput} placeholder="Search categories" value={searchQuery} onChangeText={handleSearch} selectionColor="#013b3d" />
         <FontAwesome5 name="search" size={26} color="#013b3d" style={styles.searchIcon} />
       </View>
 
       <ScrollView contentContainerStyle={styles.gridContainer}>
-        {filteredCategories.map((category: Category, index: number) => (
-          <TouchableOpacity key={index} style={styles.gridItem} onPress={() => handleCategoryPress(category.category_id)}>
-            <Text style={styles.categoryText}>{category.category_name}</Text>
-          </TouchableOpacity>
-        ))}
+        {filteredCategories.length > 0 &&
+          filteredCategories.map((category: Category, index: number) => (
+            <TouchableOpacity key={index} style={styles.gridItem} onPress={() => handleCategoryPress(category.category_id)}>
+              <Text style={styles.categoryText}>{category.category_name}</Text>
+            </TouchableOpacity>
+          ))}
       </ScrollView>
 
       <View style={styles.navbar}>
