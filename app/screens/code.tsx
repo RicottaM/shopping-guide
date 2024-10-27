@@ -82,7 +82,11 @@ export default function Code() {
             <QRCode value={JSON.stringify(getProductsIds())} size={250} />
           </View>
         </View>
-      ) : null}
+      ) : (
+        <View style={styles.codeContainer}>
+          <Text style={styles.noProductsText}>Add products to your cart.</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -109,5 +113,10 @@ const styles = StyleSheet.create({
     borderColor: '#013b3d',
     padding: 10,
     borderRadius: 10,
+  },
+  noProductsText: {
+    fontSize: 30,
+    color: '#013b3d',
+    marginBottom: 50,
   },
 });

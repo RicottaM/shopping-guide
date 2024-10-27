@@ -59,7 +59,6 @@ export default function User() {
 
   return (
     <View style={styles.container}>
-      <ChatBubble />
       <View style={styles.header}>
         <Text style={styles.userName}>Hi, {username}!</Text>
         <TouchableOpacity style={styles.logOutContainer} onPress={handleLogout}>
