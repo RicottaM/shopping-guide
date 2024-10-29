@@ -2,20 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, ScrollView, TextInput } from 'react-native';
 import { Entypo, FontAwesome5 } from '@expo/vector-icons';
 import { ChatMessage } from '../models/chatMessage.model';
-import { useGetAppData } from '../hooks/useGetAppData';
 
 export default function ChatBubble() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([{ text: `Hi! How can I help you?`, sender: 'bot' }]);
   const [inputText, setInputText] = useState('');
   const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-  const getAppData = useGetAppData();
-
-  useEffect(() => {
-    if (isExpanded) {
-      setMessages([{ text: `Hey! How can I help you?`, sender: 'bot' }]);
-    }
-  }, [isExpanded]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -37,7 +29,6 @@ export default function ChatBubble() {
     setMessages([...messages, { text: inputText, sender: 'user' }]);
     setInputText('');
 
-    // Przykładowa odpowiedź bota
     setTimeout(() => {
       setMessages((prevMessages) => [...prevMessages, { text: 'To jest odpowiedź bota.', sender: 'bot' }]);
     }, 1000);
@@ -51,7 +42,7 @@ export default function ChatBubble() {
           transform: [{ translateX: pan.x }, { translateY: pan.y }],
         },
       ]}
-      {...(isExpanded ? {} : panResponder.panHandlers)} // Attach pan handlers only when minimized
+      {...(isExpanded ? {} : panResponder.panHandlers)}
     >
       {isExpanded ? (
         <View style={styles.chatContainer}>
