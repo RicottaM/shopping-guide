@@ -7,6 +7,7 @@ import { CartItem } from '../models/cartItem.model';
 import { Product } from '../models/product.model';
 import { CartModel } from '../models/cart.model';
 import { useGetAppData } from '../hooks/useGetAppData';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Code() {
   const navigation = useNavigation();
@@ -71,6 +72,7 @@ export default function Code() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <TouchableOpacity style={styles.backButtonContainer} onPress={() => router.back()}>
         <MaterialIcons name="arrow-back-ios" size={32} color="#013b3d" />
       </TouchableOpacity>
@@ -80,7 +82,11 @@ export default function Code() {
             <QRCode value={JSON.stringify(getProductsIds())} size={250} />
           </View>
         </View>
-      ) : null}
+      ) : (
+        <View style={styles.codeContainer}>
+          <Text style={styles.noProductsText}>Add products to your cart.</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -107,5 +113,10 @@ const styles = StyleSheet.create({
     borderColor: '#013b3d',
     padding: 10,
     borderRadius: 10,
+  },
+  noProductsText: {
+    fontSize: 30,
+    color: '#013b3d',
+    marginBottom: 50,
   },
 });

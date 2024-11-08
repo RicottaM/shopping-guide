@@ -9,6 +9,7 @@ import { Unit } from '../models/unit.model';
 import { useGetAppData } from '../hooks/useGetAppData';
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Cart() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -39,7 +40,7 @@ export default function Cart() {
         try {
           const response = await fetch('http://192.168.1.10:3000' + `cart-items`);
           const data = (await response.json()) || [];
-          const userCartItems = data?.filter((cartItem: CartItem) => cartItem.cart_id === userCart.cart_id);
+          const userCartItems = data?.filter((cartItem: CartItem) => cartItem?.cart_id === userCart?.cart_id);
 
           setCartItems(userCartItems);
         } catch (error) {
@@ -133,23 +134,25 @@ export default function Cart() {
 
   return (
     <View style={styles.container}>
+      <ChatBubble />
       <View style={styles.searchContainer}>
         <TextInput style={styles.searchInput} placeholder="Search products" value={searchQuery} onChangeText={handleSearch} selectionColor="#013b3d" />
         <FontAwesome5 name="search" size={22} color="#013b3d" style={styles.searchIcon} />
       </View>
 
       <ScrollView contentContainerStyle={styles.gridContainer}>
-        {filteredProducts.map((product: Product, index: number) => (
-          <View key={index} style={styles.gridItem}>
-            <View style={styles.productNameContainer}>
-              <Text style={styles.productName}>{product.name}</Text>
+        {filteredProducts &&
+          filteredProducts.map((product: Product, index: number) => (
+            <View key={index} style={styles.gridItem}>
+              <View style={styles.productNameContainer}>
+                <Text style={styles.productName}>{product.name}</Text>
+              </View>
+              <Text style={styles.productText}>{getProductFullPrice(product) + ' $'}</Text>
+              <Text style={styles.productText} onPress={() => removeFromCart(product)}>
+                <Feather name="trash" size={26} color="#013b3d" style={styles.searchIcon} />
+              </Text>
             </View>
-            <Text style={styles.productText}>{getProductFullPrice(product) + ' $'}</Text>
-            <Text style={styles.productText} onPress={() => removeFromCart(product)}>
-              <Feather name="trash" size={26} color="#013b3d" style={styles.searchIcon} />
-            </Text>
-          </View>
-        ))}
+          ))}
       </ScrollView>
 
       <View style={styles.navbar}>

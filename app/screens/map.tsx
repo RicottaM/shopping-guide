@@ -1,15 +1,28 @@
-import React, { useLayoutEffect } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, Text, Alert } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { useSaveAppData } from '../hooks/useSaveAppData';
+import { Store } from '../models/store.model';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import { Screens } from '../enum/screens';
+import ChatBubble from '../components/ChatBubble';
 
 export default function Map() {
-  const router = useRouter();
   const navigation = useNavigation();
+  const [stores, setStores] = useState<Store[]>([]);
+  const [selectedStore, setSelectedStore] = useState<Store>();
+  const [initialRegion, setInitialRegion] = useState({
+    latitude: 52.2297,
+    longitude: 21.0122,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  });
 
-  const handleRoutePress = useHandleRouteChange();
+  const saveAppData = useSaveAppData();
+  const useRouteChange = useHandleRouteChange();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -17,18 +30,65 @@ export default function Map() {
     });
   }, [navigation]);
 
+  const handleSelectStore = async (storeId: number) => {
+    await saveAppData('selectedStoreId', storeId.toString(), 7);
+    Alert.alert(`Store has been selected successfully`);
+  };
+
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/stores');
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data: Store[] = await response.json();
+        setStores(data);
+
+        if (data.length > 0) {
+          setInitialRegion({
+            latitude: parseFloat(data[0].latitude),
+            longitude: parseFloat(data[0].longitude),
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          });
+        }
+      } catch (error) {
+        console.log('Fetching stores failed.');
+      }
+    };
+
+    fetchStores();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-
-      <Text style={styles.header}>Welcome to Shopper</Text>
-
-      <Text style={styles.paragraph}>Fill your cart, follow the trail, and make your shopping faster!</Text>
-
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/')}>
-        <Text style={styles.buttonText}>Get Started</Text>
-        <AntDesign name="right" size={24} style={styles.icon} />
+      <ChatBubble />
+      <TouchableOpacity style={styles.backButtonContainer} onPress={() => useRouteChange(Screens.Categories)}>
+        <MaterialIcons name="arrow-back-ios" size={32} color="#013b3d" />
       </TouchableOpacity>
+
+      <MapView style={styles.map} region={initialRegion}>
+        {stores.map((store: Store) => (
+          <Marker
+            key={store.store_id}
+            coordinate={{ latitude: parseFloat(store.latitude), longitude: parseFloat(store.longitude) }}
+            title={store.store_name}
+            onPress={() => setSelectedStore(store)}
+          />
+        ))}
+      </MapView>
+
+      {selectedStore && (
+        <View style={styles.storeDetails}>
+          <Text style={styles.storeName}>{selectedStore.store_name}</Text>
+          <TouchableOpacity style={styles.selectButton} onPress={() => handleSelectStore(selectedStore.store_id)}>
+            <Text style={styles.selectButtonText}>Select store</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -36,46 +96,45 @@ export default function Map() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     backgroundColor: '#a0cbb3',
   },
-  logo: {
-    width: 230,
-    height: 230,
-    borderRadius: 115,
-    marginTop: 170,
+  backButtonContainer: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 1,
   },
-  header: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#013b3d',
-    marginTop: 70,
+  map: {
+    flex: 1,
+    width: '100%',
   },
-  paragraph: {
-    fontSize: 20,
-    marginHorizontal: 20,
-    color: '#013b3d',
-    textAlign: 'center',
-    marginTop: 30,
-    paddingHorizontal: 20,
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  storeDetails: {
+    position: 'absolute',
+    bottom: 70,
+    left: 20,
+    right: 20,
     backgroundColor: '#e8fefd',
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    marginTop: 100,
-    borderRadius: 25,
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  buttonText: {
-    fontSize: 24,
-    fontWeight: '500',
+  storeName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
     color: '#013b3d',
   },
-  icon: {
-    marginTop: 2,
-    marginLeft: 6,
-    color: '#013b3d',
+  selectButton: {
+    backgroundColor: '#013b3d',
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  selectButtonText: {
+    color: '#e8fefd',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
