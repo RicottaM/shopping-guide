@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Button, FlatList, Text, Dimensions, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { useBluetoothService, FontAwesome, FontAwesome5, MaterialCommunityIcons, MaterialIcons } from '../hooks/useBluetoothService';
+import { useBluetoothService} from '../hooks/useBluetoothService';
 import positionService from '../services/PositionService';
 import StoreMap from './nav'; // Import mapy sklepu
 import { useNavigation, useRouter } from 'expo-router';
@@ -8,7 +8,6 @@ import { FontAwesome5, MaterialCommunityIcons, FontAwesome } from '@expo/vector-
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import TestSvg from '../../assets/svg/test.svg';
-import { Screens } from '../enum/screens';
 import ChatBubble from '../components/ChatBubble';
 
 export default function BluetoothScanner() {
@@ -142,25 +141,5 @@ const styles = StyleSheet.create({
     marginTop: 100,
     justifyContent: 'center',
     marginLeft: 40,
-  },
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginHorizontal: 30,
-    paddingBottom: 50,
-    paddingTop: 30,
-  },
-  navButton: {
-    alignItems: 'center',
-    backgroundColor: '#e8fefd',
-    padding: 15,
-    borderRadius: 15,
-    width: 66,
-    height: 62,
-  },
-  mapContainer: {
-    height: 790,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  },  
 });

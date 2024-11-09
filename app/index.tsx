@@ -1,13 +1,13 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import Voice from 'react-native-voice';
-import Tts from 'react-native-tts';
+// import * as Speech from 'expo-speech';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { Link, useRouter } from 'expo-router';
 import { useGetAppData } from './hooks/useGetAppData';
 import { useHandleRouteChange } from './hooks/useHandleRouteChange';
 import { Screens } from './enum/screens';
+import Voice from "@react-native-voice/voice";
 
 interface SpeechResultsEvent {
   value: string[];
@@ -20,38 +20,14 @@ export default function Home() {
   const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
   const [username, setUsername] = useState('');
+  const [recognizedText, setRecognizedText] = useState('');
+  const [isListening, setIsListening] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
-
-  useEffect(() => {
-    (async () => {
-      const userData = await getAppData('username');
-      setUsername(userData);
-    })();
-  }, []);
-
-  // Initialize voice and TTS settings
-  useEffect(() => {
-    Voice.onSpeechResults = onSpeechResults;
-    Tts.speak("Welcome to Shopper. Say 'Get started' to begin.");
-
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
-  }, []);
-
-  const onSpeechResults = (event: SpeechResultsEvent) => {
-    const spokenText = event.value[0].toLowerCase();
-    if (spokenText.includes('get started')) {
-      handleGetStarted();
-    } else {
-      Tts.speak("I didn't understand. Please say 'Get started'.");
-    }
-  };
 
   const handleGetStarted = () => {
     if (username) {
@@ -61,8 +37,38 @@ export default function Home() {
     }
   };
 
-  const startVoiceRecognition = () => {
-    Voice.start('en-US');
+  // const textVoice = (text: string) => {
+  //   Speech.speak("Hello shopper!");
+  // }
+
+  useEffect(() => {
+    Voice.onSpeechStart = onSpeechStart;
+    Voice.onSpeechResults = onSpeechResults;
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
+
+  const onSpeechStart = (e: any) => {
+    console.log('onSpeechStart: ', e);
+    setIsListening(true);
+  };
+
+  const onSpeechResults = (e: any) => {
+    console.log('onSpeechResults: ', e);
+    const text = e.value[0];
+    setRecognizedText(text);
+    setIsListening(false);
+  };
+
+  const startListening = async () => {
+    setRecognizedText('');
+    try {
+      await Voice.start('en-US');
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -71,15 +77,23 @@ export default function Home() {
       <Text style={styles.header}>Welcome to Shopper</Text>
       <Text style={styles.paragraph}>Fill your cart, follow the trail, and make your shopping faster!</Text>
 
-      <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
-        <Text style={styles.buttonText}>Get Started</Text>
+      {/* <TouchableOpacity style={styles.button} onPress={() => {textVoice("Hello shopper!")}}>
+        <Text style={styles.buttonText}>Voice</Text>
+        <AntDesign name="right" size={24} style={styles.icon} />
+      </TouchableOpacity> */}
+
+      <TouchableOpacity style={styles.button} onPress={startListening}>
+        <Text style={styles.buttonText}>{isListening ? 'Listening...' : 'Start Voice Input'}</Text>
         <AntDesign name="right" size={24} style={styles.icon} />
       </TouchableOpacity>
 
-      {/* Voice command trigger */}
-      <TouchableOpacity onPress={startVoiceRecognition} style={styles.voiceButton}>
-        <AntDesign name="sound" size={24} color="#013b3d" />
-        <Text style={styles.voiceButtonText}>Voice Command</Text>
+      {recognizedText !== '' && (
+        <Text style={styles.recognizedText}>You said: {recognizedText}</Text>
+      )}
+
+      <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
+        <Text style={styles.buttonText}>Get Started</Text>
+        <AntDesign name="right" size={24} style={styles.icon} />
       </TouchableOpacity>
     </View>
   );
@@ -99,6 +113,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#013b3d',
     marginLeft: 10,
+  },
+  recognizedText: {
+    fontSize: 18,
+    color: '#013b3d',
+    marginTop: 20,
   },
   container: {
     flex: 1,
@@ -131,7 +150,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#e8fefd',
     paddingVertical: 20,
     paddingHorizontal: 24,
-    marginTop: 100,
+    marginTop: 30,
     borderRadius: 25,
   },
   buttonText: {
