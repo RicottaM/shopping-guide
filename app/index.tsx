@@ -1,33 +1,84 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-// import * as Speech from 'expo-speech';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useGetAppData } from './hooks/useGetAppData';
 import { useHandleRouteChange } from './hooks/useHandleRouteChange';
 import { Screens } from './enum/screens';
-import Voice from "@react-native-voice/voice";
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 
-interface SpeechResultsEvent {
-  value: string[];
-}
 
 export default function Home() {
   const router = useRouter();
   const navigation = useNavigation();
-
   const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
-  const [username, setUsername] = useState('');
-  const [recognizedText, setRecognizedText] = useState('');
-  const [isListening, setIsListening] = useState(false);
 
+  const [username, setUsername] = useState('');
+  const [transcript, setTranscript] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [isError, setError] = useState<string>('');
+
+  useEffect(() => {
+    const checkAvailability = async () => {
+      try {
+        const isAvailable = await ExpoSpeechRecognitionModule.isRecognitionAvailable();
+        if (!isAvailable) {
+          setError('Speech recognition is not available on this device');
+        }
+      } catch (e) {
+        setError('Error checking speech recognition availability');
+      }
+    };
+    
+    checkAvailability();
+  }, []);
+  
   useLayoutEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
   }, [navigation]);
+
+  // Use the speech recognition event hooks
+  useSpeechRecognitionEvent('start', () => {
+    console.log('Recognition started');
+    setIsListening(true);
+    setError('');
+  });
+
+  useSpeechRecognitionEvent('start', () => {
+    console.log('Recognition started');
+    setIsListening(true);
+    setError('');
+  });
+  
+  useSpeechRecognitionEvent('result', (event) => {
+    console.log('Recognition result:', event);
+    if (event.results && event.results.length > 0) {
+      const newTranscript = event.results[0].transcript;
+      console.log('New transcript:', newTranscript);
+      setTranscript(newTranscript);
+    }
+  });
+  
+  useSpeechRecognitionEvent('error', (event) => {
+    const errorMessage = `Error: ${event.error} - ${event.message}`;
+    console.error(errorMessage);
+    setError(errorMessage);
+    setIsListening(false);
+  });
 
   const handleGetStarted = () => {
     if (username) {
@@ -37,59 +88,71 @@ export default function Home() {
     }
   };
 
-  // const textVoice = (text: string) => {
-  //   Speech.speak("Hello shopper!");
-  // }
-
-  useEffect(() => {
-    Voice.onSpeechStart = onSpeechStart;
-    Voice.onSpeechResults = onSpeechResults;
-
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
-  }, []);
-
-  const onSpeechStart = (e: any) => {
-    console.log('onSpeechStart: ', e);
-    setIsListening(true);
-  };
-
-  const onSpeechResults = (e: any) => {
-    console.log('onSpeechResults: ', e);
-    const text = e.value[0];
-    setRecognizedText(text);
-    setIsListening(false);
-  };
-
-  const startListening = async () => {
-    setRecognizedText('');
+  const handleStart = async () => {
     try {
-      await Voice.start('en-US');
+      setError('');
+      setTranscript('');
+  
+      const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!permission.granted) {
+        setError('Microphone permission denied');
+        return;
+      }
+  
+      await ExpoSpeechRecognitionModule.start({
+        lang: 'pl-PL',
+        interimResults: true,
+        maxAlternatives: 1,
+        continuous: true, // Changed to true
+        requiresOnDeviceRecognition: false,
+        addsPunctuation: true,
+        volumeChangeEventOptions: {
+          enabled: true,
+          intervalMillis: 100,
+        }
+      });
+  
     } catch (e) {
-      console.error(e);
+      setError(`Start error: ${e.message}`);
+      setIsListening(false);
+    }
+  };
+  
+  // Modify your handleStop function
+  const handleStop = async () => {
+    try {
+      await ExpoSpeechRecognitionModule.stop();
+      setIsListening(false);
+    } catch (e) {
+      setError(`Stop error: ${e.message}`);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/images/logo.png')} style={styles.logo} />
+      <Image
+        source={require('../assets/images/logo.png')}
+        style={styles.logo}
+      />
       <Text style={styles.header}>Welcome to Shopper</Text>
-      <Text style={styles.paragraph}>Fill your cart, follow the trail, and make your shopping faster!</Text>
+      <Text style={styles.paragraph}>
+        Fill your cart, follow the trail, and make your shopping faster!
+      </Text>
 
-      {/* <TouchableOpacity style={styles.button} onPress={() => {textVoice("Hello shopper!")}}>
-        <Text style={styles.buttonText}>Voice</Text>
-        <AntDesign name="right" size={24} style={styles.icon} />
-      </TouchableOpacity> */}
-
-      <TouchableOpacity style={styles.button} onPress={startListening}>
-        <Text style={styles.buttonText}>{isListening ? 'Listening...' : 'Start Voice Input'}</Text>
-        <AntDesign name="right" size={24} style={styles.icon} />
+      <TouchableOpacity
+        style={[styles.button, isListening && styles.listeningButton]}
+        onPress={isListening ? handleStop : handleStart}>
+        <Text style={styles.buttonText}>
+          {isListening ? 'Tap to Stop' : 'Start Voice Input'}
+        </Text>
+        <AntDesign name="sound" size={24} style={styles.icon} />
       </TouchableOpacity>
 
-      {recognizedText !== '' && (
-        <Text style={styles.recognizedText}>You said: {recognizedText}</Text>
-      )}
+      {isError ? (
+        <Text style={styles.errorText}>{isError}</Text>
+      ) : transcript ? (
+        <Text style={styles.recognizedText}>You said: {transcript}</Text>
+      ) : null}
 
       <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
         <Text style={styles.buttonText}>Get Started</Text>
@@ -100,25 +163,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  voiceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#e8fefd',
-    borderRadius: 20,
-    marginTop: 20,
-  },
-  voiceButtonText: {
-    fontSize: 18,
-    color: '#013b3d',
-    marginLeft: 10,
-  },
-  recognizedText: {
-    fontSize: 18,
-    color: '#013b3d',
-    marginTop: 20,
-  },
+  // ... your styles here
   container: {
     flex: 1,
     alignItems: 'center',
@@ -127,40 +172,50 @@ const styles = StyleSheet.create({
   logo: {
     width: 230,
     height: 230,
-    borderRadius: 115,
-    marginTop: 170,
+    marginTop: 50,
   },
   header: {
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#013b3d',
-    marginTop: 70,
+    marginTop: 20,
   },
   paragraph: {
-    fontSize: 20,
-    marginHorizontal: 20,
+    fontSize: 16,
     color: '#013b3d',
     textAlign: 'center',
-    marginTop: 30,
-    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 10,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#e8fefd',
-    paddingVertical: 20,
-    paddingHorizontal: 24,
-    marginTop: 30,
+    padding: 15,
     borderRadius: 25,
+    marginTop: 20,
+    width: '80%',
+    justifyContent: 'center',
   },
   buttonText: {
-    fontSize: 24,
-    fontWeight: '500',
+    fontSize: 18,
     color: '#013b3d',
+    marginRight: 10,
   },
   icon: {
-    marginTop: 2,
-    marginLeft: 6,
     color: '#013b3d',
+  },
+  listeningButton: {
+    backgroundColor: '#ff6b6b',
+  },
+  errorText: {
+    color: '#ff0033',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  recognizedText: {
+    fontSize: 18,
+    color: '#013b3d',
+    marginTop: 20,
   },
 });

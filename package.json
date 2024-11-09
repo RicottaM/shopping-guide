@@ -17,7 +17,6 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@react-native-cookies/cookies": "^6.2.1",
-    "@react-native-voice/voice": "^3.2.4",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/stack": "^6.4.1",
@@ -29,6 +28,7 @@
     "expo-router": "~3.5.23",
     "expo-secure-store": "^13.0.2",
     "expo-speech": "~12.0.2",
+    "expo-speech-recognition": "^0.2.24",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.6",
@@ -48,7 +48,6 @@
     "react-native-svg-transformer": "^1.5.0",
     "react-native-tts": "^4.1.1",
     "react-native-vector-icons": "^10.1.0",
-    "react-native-voice": "^0.3.0",
     "react-native-web": "~0.19.10",
     "rxjs": "^7.8.1"
   },
