@@ -5,7 +5,7 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  TextInput,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -17,7 +17,7 @@ import {
   ExpoSpeechRecognitionModule,
   useSpeechRecognitionEvent,
 } from 'expo-speech-recognition';
-
+import * as Speech from 'expo-speech';
 
 export default function Home() {
   const router = useRouter();
@@ -29,7 +29,8 @@ export default function Home() {
   const [transcript, setTranscript] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [isError, setError] = useState<string>('');
-
+  const [textToSpeak, setTextToSpeak] = useState('');
+  
   useEffect(() => {
     const checkAvailability = async () => {
       try {
@@ -51,31 +52,20 @@ export default function Home() {
     });
   }, [navigation]);
 
-  // Use the speech recognition event hooks
   useSpeechRecognitionEvent('start', () => {
-    console.log('Recognition started');
-    setIsListening(true);
-    setError('');
-  });
-
-  useSpeechRecognitionEvent('start', () => {
-    console.log('Recognition started');
     setIsListening(true);
     setError('');
   });
   
   useSpeechRecognitionEvent('result', (event) => {
-    console.log('Recognition result:', event);
     if (event.results && event.results.length > 0) {
       const newTranscript = event.results[0].transcript;
-      console.log('New transcript:', newTranscript);
       setTranscript(newTranscript);
     }
   });
   
   useSpeechRecognitionEvent('error', (event) => {
     const errorMessage = `Error: ${event.error} - ${event.message}`;
-    console.error(errorMessage);
     setError(errorMessage);
     setIsListening(false);
   });
@@ -103,7 +93,7 @@ export default function Home() {
         lang: 'pl-PL',
         interimResults: true,
         maxAlternatives: 1,
-        continuous: true, // Changed to true
+        continuous: true,
         requiresOnDeviceRecognition: false,
         addsPunctuation: true,
         volumeChangeEventOptions: {
@@ -113,19 +103,22 @@ export default function Home() {
       });
   
     } catch (e) {
-      setError(`Start error: ${e.message}`);
+      setError(`Start error: ${(e as Error).message}`);
       setIsListening(false);
     }
   };
   
-  // Modify your handleStop function
   const handleStop = async () => {
     try {
       await ExpoSpeechRecognitionModule.stop();
       setIsListening(false);
     } catch (e) {
-      setError(`Stop error: ${e.message}`);
+      setError(`Stop error: ${(e as Error).message}`);
     }
+  };
+
+  const handleSpeak = () => {
+    Speech.speak(textToSpeak, { language: 'pl-PL' });
   };
 
   return (
@@ -154,6 +147,17 @@ export default function Home() {
         <Text style={styles.recognizedText}>You said: {transcript}</Text>
       ) : null}
 
+      <TextInput
+        style={styles.input}
+        placeholder="Enter text to speak"
+        value={textToSpeak}
+        onChangeText={setTextToSpeak}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleSpeak}>
+        <Text style={styles.buttonText}>Speak</Text>
+        <AntDesign name="sound" size={24} style={styles.icon} />
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
         <Text style={styles.buttonText}>Get Started</Text>
         <AntDesign name="right" size={24} style={styles.icon} />
@@ -163,7 +167,6 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  // ... your styles here
   container: {
     flex: 1,
     alignItems: 'center',
@@ -217,5 +220,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#013b3d',
     marginTop: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: '#013b3d',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginTop: 20,
+    width: '80%',
   },
 });
