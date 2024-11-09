@@ -39,7 +39,7 @@ export default function User() {
   }
 
   const logoutUser = async () => {
-    await fetch('http://192.168.1.10:3000' + '/auth/logout');
+    await fetch('http://192.168.100.139:3000' + '/auth/logout');
   };
 
   const deleteUserData = async () => {

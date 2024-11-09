@@ -1,10 +1,15 @@
-// USEVOICEFLOW.TS
+// useVoiceFlow.ts
 import { useSpeechFlow } from './useSpeechFlow';
 
 export const useVoiceFlow = () => {
     const { speak, listen } = useSpeechFlow();
 
-    const traverseFlow = async (flow: any, currentNodeKey: string, context: any = {}) => {
+    const traverseFlow = async (
+        flow: any,
+        currentNodeKey: string,
+        context: any = {},
+        onContextUpdate?: (context: any) => void
+    ) => {
         let currentNodeKeyLocal = currentNodeKey;
 
         while (currentNodeKeyLocal) {
@@ -76,7 +81,12 @@ export const useVoiceFlow = () => {
                         const responseKey = currentNode.onResponseKey || currentNodeKeyLocal;
                         context[responseKey] = userResponse;
 
-                        currentNodeKeyLocal = currentNode.next;
+                        // **Call the onContextUpdate callback**
+                        if (onContextUpdate) {
+                            onContextUpdate({ ...context }); // Spread to create a new object
+                        }
+
+                        currentNodeKeyLocal = currentNode.onResponse;
                         continue;
                     }
                 } catch (error) {
@@ -97,6 +107,8 @@ export const useVoiceFlow = () => {
                 break;
             }
         }
+
+        return context;
     };
 
     return { traverseFlow };

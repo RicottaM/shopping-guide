@@ -26,13 +26,13 @@ export default function Code() {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const carts = await fetch('http://192.168.1.10:3000' + `/carts`);
+        const carts = await fetch('http://192.168.100.139:3000' + `/carts`);
         const cartsData = await carts.json();
         const userId = await getAppData('userId');
         const userCart = cartsData.find((cart: CartModel) => cart.user_id === userId);
 
         if (userCart) {
-          const response = await fetch('http://192.168.1.10:3000' + `/cart-items`);
+          const response = await fetch('http://192.168.100.139:3000' + `/cart-items`);
           const data = await response.json();
           const userCartItems = data.filter((cartItem: CartItem) => cartItem.cart_id === userCart.cart_id);
           setCartItems(userCartItems);
@@ -44,7 +44,7 @@ export default function Code() {
 
     const fetchCartProducts = async () => {
       try {
-        const productsResponse = await fetch('http://192.168.1.10:3000' + `/products`);
+        const productsResponse = await fetch('http://192.168.100.139:3000' + `/products`);
         const productsData = await productsResponse.json();
         const filteredProducts = cartItems.map((cartItem: CartItem) => {
           return productsData.find((product: Product) => product.product_id === cartItem.product_id);

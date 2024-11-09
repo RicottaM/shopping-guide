@@ -32,13 +32,13 @@ export default function Cart() {
   useEffect(() => {
     const setCartItemsByCart = async () => {
       try {
-        const carts = await fetch('http://192.168.1.10:3000' + `/carts`);
+        const carts = await fetch('http://192.168.100.139:3000' + `/carts`);
         const cartsData = await carts.json();
         const userId = await getAppData('userId');
         const userCart = cartsData.find((cart: CartModel) => cart.user_id === userId);
 
         try {
-          const response = await fetch('http://192.168.1.10:3000' + `cart-items`);
+          const response = await fetch('http://192.168.100.139:3000' + `cart-items`);
           const data = (await response.json()) || [];
           const userCartItems = data?.filter((cartItem: CartItem) => cartItem?.cart_id === userCart?.cart_id);
 
@@ -53,7 +53,7 @@ export default function Cart() {
 
     const fetchUnits = async () => {
       try {
-        const response = await fetch('http://192.168.1.10:3000' + `units`);
+        const response = await fetch('http://192.168.100.139:3000' + `units`);
         const data = await response.json();
         setUnits(data);
       } catch (error) {
@@ -68,7 +68,7 @@ export default function Cart() {
   useEffect(() => {
     const setProductsByCart = async () => {
       try {
-        const products = await fetch('http://192.168.1.10:3000' + `products`);
+        const products = await fetch('http://192.168.100.139:3000' + `products`);
         const productsData = await products.json();
 
         const filteredCartProducts: Product[] = cartItems.map((cartItem: CartItem) => {
@@ -98,7 +98,7 @@ export default function Cart() {
       const cartItemToRemove = cartItems.find((cartItem: CartItem) => cartItem.product_id === product.product_id);
 
       if (cartItemToRemove) {
-        const response = await fetch('http://192.168.1.10:3000' + `/cart-items/${cartItemToRemove.cart_item_id}`, {
+        const response = await fetch('http://192.168.100.139:3000' + `/cart-items/${cartItemToRemove.cart_item_id}`, {
           method: 'DELETE',
         });
 

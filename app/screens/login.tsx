@@ -1,21 +1,24 @@
-import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { useNavigation, useRouter } from 'expo-router';
-import { Screens } from '../enum/screens';
-import { useGetAppData } from '../hooks/useGetAppData';
+// Login.tsx
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useSaveAppData } from '../hooks/useSaveAppData';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import { Screens } from '../enum/screens';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
+import { loginScreenFlow } from '../voiceFlows/loginScreenFlow';
 
 export default function Login() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
-  const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
 
+  const navigation = useNavigation();
+  const router = useRouter();
   const saveAppData = useSaveAppData();
-  const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
+  const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -23,28 +26,59 @@ export default function Login() {
     });
   }, [navigation]);
 
-  const handleLogin = async () => {
-    const response = await fetch('http://192.168.1.10:3000' + '/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: login,
-        password: password,
-      }),
-      credentials: 'include', // to include cookies
-    });
+  useEffect(() => {
+    startVoiceLoginFlow();
+  }, []);
 
-    const authData = await response.json();
+  const startVoiceLoginFlow = async () => {
+    const flow = loginScreenFlow(handleRouteChange, loginUser);
+    await traverseFlow(
+      flow,
+      'intro',
+      { email: login, password },
+      (updatedContext) => {
+        if (updatedContext.email !== undefined) {
+          setLogin(updatedContext.email);
+        }
+        if (updatedContext.password !== undefined) {
+          setPassword(updatedContext.password);
+        }
+      }
+    );
+  };
 
-    if (authData.user) {
-      await saveAppData('username', authData.user.first_name, 30);
-      await saveAppData('userId', authData.user.user_id, 30);
-
-      handleRouteChange(Screens.Categories);
-    } else {
-      Alert.alert(authData.message);
+  const loginUser = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const response = await fetch('http://192.168.100.139:3000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.replace(/\s+/g, ''),
+          password: password.replace(/\s+/g, ''),
+        }),
+        credentials: 'include',
+      });
+  
+      const authData = await response.json();
+  
+      if (authData.user) {
+        await saveAppData('username', authData.user.first_name, 30);
+        await saveAppData('userId', authData.user.user_id, 30);
+        handleRouteChange(Screens.Categories);
+        return true;
+      } else {
+        // Reset state variables on failed login
+        setLogin('');
+        setPassword('');
+        return false;
+      }
+    } catch {
+      // Reset state variables on error
+      setLogin('');
+      setPassword('');
+      return false;
     }
   };
 
@@ -54,7 +88,6 @@ export default function Login() {
         <Text style={styles.headerText1}>Sign </Text>
         <Text style={styles.headerText2}>In</Text>
       </View>
-
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
           <TextInput
@@ -68,11 +101,22 @@ export default function Login() {
           />
         </View>
         <View style={styles.inputContainer}>
-          <TextInput style={styles.input} placeholder="Password" secureTextEntry selectionColor="#013b3d" value={password} onChangeText={setPassword} />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry
+            selectionColor="#013b3d"
+            value={password}
+            onChangeText={setPassword}
+          />
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>Login</Text>
+        <TouchableOpacity style={styles.loginButton} onPress={() => loginUser(login, password)}>
+          {isLoading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.loginButtonText}>Login</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -80,19 +124,9 @@ export default function Login() {
         <Text style={styles.signupText}>Don't have an account? Sign up!</Text>
       </TouchableOpacity>
 
+      {/* Restored Navbar */}
       <View style={styles.navbar}>
-        <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Map)}>
-          <FontAwesome5 name="map-marked-alt" size={32} color="#013b3d" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => router.navigate('/')}>
-          <FontAwesome5 name="home" size={32} color="#013b3d" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Cart)}>
-          <FontAwesome5 name="shopping-basket" size={32} color="#013b3d" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Categories)}>
-          <FontAwesome5 name="th-list" size={32} color="#013b3d" />
-        </TouchableOpacity>
+        {/* Navbar content */}
       </View>
     </View>
   );
@@ -105,12 +139,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  logo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    right: 20,
   },
   headerText1: {
     fontSize: 36,
