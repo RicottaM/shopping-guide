@@ -13,6 +13,7 @@ import { cartRouter } from './api/carts/cart.router.js';
 import { storeRouter } from './api/stores/store.router.js';
 import { errorHandler } from './error/error-handler.js'; 
 import { edgeRouter } from './api/edges/edge.router.js';
+import { bleDeviceRouter } from './api/ble_devices/ble_device.router.js';
 
 const app = express();
 const port = process.env.SERVER_PORT || 3003;
@@ -35,6 +36,7 @@ app.use('/carts', cartRouter);
 app.use('/units', unitRouter);
 app.use('/stores', storeRouter);
 app.use('/edges', edgeRouter);
+app.use('/ble_devices', bleDeviceRouter);
 
 app.use(errorHandler);
 
