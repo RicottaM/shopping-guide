@@ -1,0 +1,61 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 200 500"
+  preserveAspectRatio="xMidYMid meet"
+  width="100%"  
+  height="100%" 
+>
+  <!-- Tło -->
+  <rect width="100%" height="100%" fill="#a0cbb3" />
+  
+  <!-- Sekcja 1 -->
+  <rect
+    class="section section-1"
+    x="50"
+    y="10"
+    width="100"
+    height="80"
+    rx="15"
+    fill="#013b3d"
+  />
+  <!-- Sekcja 2 -->
+  <rect
+    class="section section-2"
+    x="50"
+    y="110"
+    width="100"
+    height="80"
+    rx="15"
+    fill="#013b3d"
+  />
+  <!-- Sekcja 3 -->
+  <rect
+    class="section section-3"
+    x="50"
+    y="210"
+    width="100"
+    height="80"
+    rx="15"
+    fill="#013b3d"
+  />
+  <!-- Sekcja 4 -->
+  <rect
+    class="section section-4"
+    x="50"
+    y="310"
+    width="100"
+    height="80"
+    rx="15"
+    fill="#013b3d"
+  />
+  <!-- Sekcja 5 -->
+  <rect
+    class="section section-5"
+    x="50"
+    y="410"
+    width="100"
+    height="80"
+    rx="15"
+    fill="#013b3d"
+  />
+</svg>

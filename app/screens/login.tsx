@@ -32,24 +32,19 @@ export default function Login() {
 
   const startVoiceLoginFlow = async () => {
     const flow = loginScreenFlow(handleRouteChange, loginUser);
-    await traverseFlow(
-      flow,
-      'intro',
-      { email: login, password },
-      (updatedContext) => {
-        if (updatedContext.email !== undefined) {
-          setLogin(updatedContext.email);
-        }
-        if (updatedContext.password !== undefined) {
-          setPassword(updatedContext.password);
-        }
+    await traverseFlow(flow, 'intro', { email: login, password }, (updatedContext) => {
+      if (updatedContext.email !== undefined) {
+        setLogin(updatedContext.email);
       }
-    );
+      if (updatedContext.password !== undefined) {
+        setPassword(updatedContext.password);
+      }
+    });
   };
 
   const loginUser = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://192.168.100.139:3000/auth/login', {
+      const response = await fetch('http://172.20.10.3:3000/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -60,9 +55,9 @@ export default function Login() {
         }),
         credentials: 'include',
       });
-  
+
       const authData = await response.json();
-  
+
       if (authData.user) {
         await saveAppData('username', authData.user.first_name, 30);
         await saveAppData('userId', authData.user.user_id, 30);
@@ -101,22 +96,11 @@ export default function Login() {
           />
         </View>
         <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            selectionColor="#013b3d"
-            value={password}
-            onChangeText={setPassword}
-          />
+          <TextInput style={styles.input} placeholder="Password" secureTextEntry selectionColor="#013b3d" value={password} onChangeText={setPassword} />
         </View>
 
         <TouchableOpacity style={styles.loginButton} onPress={() => loginUser(login, password)}>
-          {isLoading ? (
-            <ActivityIndicator color="#ffffff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
-          )}
+          {isLoading ? <ActivityIndicator color="#ffffff" /> : <Text style={styles.loginButtonText}>Login</Text>}
         </TouchableOpacity>
       </View>
 
@@ -125,9 +109,7 @@ export default function Login() {
       </TouchableOpacity>
 
       {/* Restored Navbar */}
-      <View style={styles.navbar}>
-        {/* Navbar content */}
-      </View>
+      <View style={styles.navbar}>{/* Navbar content */}</View>
     </View>
   );
 }

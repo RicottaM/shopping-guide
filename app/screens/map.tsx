@@ -15,8 +15,8 @@ export default function Map() {
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<Store>();
   const [initialRegion, setInitialRegion] = useState({
-    latitude: 52.2297,
-    longitude: 21.0122,
+    latitude: 54.370898321968866,
+    longitude: 18.613211024723892,
     latitudeDelta: 0.05,
     longitudeDelta: 0.05,
   });
@@ -38,7 +38,7 @@ export default function Map() {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const response = await fetch('http://localhost:3000/stores');
+        const response = await fetch('http://172.20.10.3:3000/stores');
 
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -47,10 +47,12 @@ export default function Map() {
         const data: Store[] = await response.json();
         setStores(data);
 
+        const initialStore = data.find((store: Store) => store.store_name === 'ETI');
+
         if (data.length > 0) {
           setInitialRegion({
-            latitude: parseFloat(data[0].latitude),
-            longitude: parseFloat(data[0].longitude),
+            latitude: parseFloat(initialStore ? initialStore.latitude : data[0].latitude),
+            longitude: parseFloat(initialStore ? initialStore.longitude : data[0].longitude),
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           });

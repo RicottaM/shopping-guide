@@ -29,7 +29,7 @@ export default function Categories() {
     const fetchCategories = async () => {
       try {
         const storeId = await getAppData('selectedStoreId');
-        const response = await fetch(`http://localhost:3000/stores/${storeId}/categories`);
+        const response = await fetch(`http://172.20.10.3:3000/stores/${storeId}/categories`);
         const data = await response.json();
 
         setCategories(data);
