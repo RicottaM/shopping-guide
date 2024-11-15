@@ -91,6 +91,12 @@ export const userService = {
       [email, hashedPassword, first_name, last_name]
     );
 
+    // Insert new cart for the user
+    const newCart = await client.query(
+      'INSERT INTO carts (user_id, creation_date) VALUES ($1, NOW()) RETURNING cart_id',
+      [newUser.rows[0].user_id]
+    );
+
     return newUser.rows[0];
   },
 
