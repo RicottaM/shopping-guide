@@ -11,7 +11,8 @@ import { cartItemRouter } from './api/cartItems/cartItem.router.js';
 import { unitRouter } from './api/units/unit.router.js';
 import { cartRouter } from './api/carts/cart.router.js';
 import { storeRouter } from './api/stores/store.router.js';
-import { errorHandler } from './error/error-handler.js';
+import { errorHandler } from './error/error-handler.js'; 
+import { edgeRouter } from './api/edges/edge.router.js';
 
 const app = express();
 const port = process.env.SERVER_PORT || 3003;
@@ -33,6 +34,7 @@ app.use('/cart-items', cartItemRouter);
 app.use('/carts', cartRouter);
 app.use('/units', unitRouter);
 app.use('/stores', storeRouter);
+app.use('/edges', edgeRouter);
 
 app.use(errorHandler);
 
