@@ -20,12 +20,11 @@ export function useBluetoothService() {
 
   const getAppData = useGetAppData();
 
-  // Kalman filter variables
   const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
   const kalmanStateRef = useRef<{ [key: string]: number }>({});
   const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
-  const processNoise = 0.008; // process noise covariance
-  const measurementNoise = 1; // measurement noise covariance
+  const processNoise = 0.008;
+  const measurementNoise = 1;
 
   useEffect(() => {
     const fetchBleDevices = async () => {
@@ -34,7 +33,7 @@ export function useBluetoothService() {
         const bleDevices = await fetch(`http://172.20.10.3:3000/ble_devices/${storeId}`);
         const bleDevicesData = await bleDevices.json();
 
-        setBleDevices(bleDevicesData);
+        return bleDevicesData;
       } catch (error) {
         if (error instanceof Error) {
           console.error('An error occured while getting ble devices: ', error.message);
@@ -44,21 +43,19 @@ export function useBluetoothService() {
       }
     };
 
-    fetchBleDevices();
+    fetchBleDevices().then((bleDevices: BleDevice[]) => {
+      //console.log(bleDevices);
+      if (bleDevices) {
+        const mapping: { [key: string]: number } = {};
+        //console.log(bleDevices);
+        bleDevices.forEach((device) => {
+          mapping[device.mac] = device.section_id;
+        });
+
+        setMacToNameMapping(mapping);
+      }
+    });
   }, []);
-
-  useEffect(() => {
-    if (bleDevices) {
-      const mapping: { [key: string]: number } = {};
-
-      bleDevices.forEach((device) => {
-        mapping[device.mac] = device.section_id;
-      });
-
-      setMacToNameMapping(mapping);
-      console.log('macToNameMapping:', mapping);
-    }
-  }, [bleDevices]);
 
   const scanDevices = async () => {
     if (isScanning) {
@@ -95,6 +92,8 @@ export function useBluetoothService() {
           return;
         }
 
+        console.log('Scanned device: ', scannedDevice);
+
         if (scannedDevice && scannedDevice.name === 'HMSoft') {
           const uuid = scannedDevice.id;
           if (!deviceSetRef.current.has(uuid)) {
@@ -123,16 +122,13 @@ export function useBluetoothService() {
 
           if (sortedDevices.length >= 1) {
             const topDevice = sortedDevices[0];
+
             if (macToNameMapping) {
               const mappedName = macToNameMapping[topDevice.device.id];
 
               if (mappedName !== undefined) {
                 positionService.updateLocation(mappedName);
-              } else {
-                console.error('MappedName is undefined.');
               }
-            } else {
-              console.error('MacToNameMapping is undefined.');
             }
           }
 
