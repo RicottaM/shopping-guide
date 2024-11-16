@@ -3,8 +3,6 @@ import { Svg, Rect } from 'react-native-svg';
 import { useGetAppData } from '@/app/hooks/useGetAppData';
 import PathFindingService from '@/app/services/PathFindingService';
 import { Section } from '@/app/models/section.model';
-import { Product } from '@/app/models/product.model';
-import { Category } from '@/app/models/category.model';
 import { theme } from '@/app/utils/theme';
 import { CartModel } from '@/app/models/cart.model';
 

@@ -13,13 +13,11 @@ class PathFindingService {
   }
 
   getPath(sections: number[], currentSection: number): number[] | undefined {
-    console.log('sections: ', sections);
     this.graph = this.generateGraph(this.edges);
     try {
       const initialPath = this.greedyPath(currentSection, sections);
       const optimizedPath = this.twoOpt(initialPath);
 
-      console.log('opti: ', optimizedPath);
       return optimizedPath;
     } catch (error) {
       if (error instanceof Error) {
