@@ -31,10 +31,10 @@ export function useBluetoothService() {
     const fetchBleDevices = async () => {
       try {
         const storeId = await getAppData('selectedStoreId');
-        const bleDevicesResponse = await fetch(`http://172.20.10.7:3000/ble_devices/${storeId}`);
+        const bleDevicesResponse = await fetch(`http://172.20.10.3:3000/ble_devices/${storeId}`);
         const bleDevicesData = await bleDevicesResponse.json();
 
-        return bleDevicesData;
+        setBleDevices(bleDevicesData);
       } catch (error) {
         if (error instanceof Error) {
           console.error('An error occurred while getting BLE devices: ', error.message);
@@ -71,16 +71,13 @@ export function useBluetoothService() {
       setIsScanning(false);
     } else {
       if (Platform.OS === 'android' && Platform.Version >= 23) {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'Bluetooth Low Energy requires Location permission',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+          title: 'Location Permission',
+          message: 'Bluetooth Low Energy requires Location permission',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        });
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
           return;
         }
@@ -95,12 +92,8 @@ export function useBluetoothService() {
           return;
         }
 
-        console.log('Scanned device: ', scannedDevice);
-
         if (scannedDevice && scannedDevice.name === 'HMSoft') {
-          // For Android, scannedDevice.id may not be the MAC address
-          // Use scannedDevice.address if available, or adjust as needed
-          const macAddress = scannedDevice.id.toUpperCase(); // Adjust identifier as necessary
+          const macAddress = scannedDevice.id.toUpperCase();
 
           if (!deviceSetRef.current.has(macAddress)) {
             deviceSetRef.current.add(macAddress);
@@ -117,9 +110,9 @@ export function useBluetoothService() {
               prevDevices.map((scanned) =>
                 scanned.id === macAddress
                   ? {
-                    ...scanned,
-                    filteredRssi: scannedDevice.rssi ?? scanned.filteredRssi,
-                  }
+                      ...scanned,
+                      filteredRssi: scannedDevice.rssi ?? scanned.filteredRssi,
+                    }
                   : scanned
               )
             );
@@ -183,13 +176,7 @@ export function useBluetoothService() {
     kalmanCovarianceRef.current[identifier] = updatedCovariance;
 
     // Update the device's filtered RSSI value
-    setDevices((prevDevices) =>
-      prevDevices.map((device) =>
-        device.id === identifier
-          ? { ...device, filteredRssi: updatedState }
-          : device
-      )
-    );
+    setDevices((prevDevices) => prevDevices.map((device) => (device.id === identifier ? { ...device, filteredRssi: updatedState } : device)));
   };
 
   useEffect(() => {
