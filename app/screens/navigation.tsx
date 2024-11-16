@@ -46,29 +46,6 @@ export default function Navigation() {
     };
   }, []);
 
-  useEffect(() => {
-    const getEdges = async () => {
-      try {
-        const storeId = await getAppData('selectedStoreId');
-        const edges = await fetch(`http://172.20.10.4:3000/edges/${storeId}`);
-        const edgesData = await edges.json();
-
-        setEdges(edgesData);
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error('An error occured while getting edges: ', error.message);
-        } else {
-          console.error('An error occured while getting edges.');
-        }
-      }
-    };
-
-    getEdges();
-  }, []);
-
-  // Przykładowe odwiedzone sekcje - możesz dodać bardziej dynamiczną logikę opartą na aktualnej lokalizacji
-  const visitedSections = currentLocation ? [`A${currentLocation}`] : [];
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
