@@ -12,16 +12,21 @@ class PathFindingService {
     this.edges = edges;
   }
 
-  getPath(sections: Section[], currentSection: number): number[] | undefined {
+  getPath(sections: number[], currentSection: number): number[] | undefined {
+    console.log('sections: ', sections);
     this.graph = this.generateGraph(this.edges);
     try {
-      let sectionNumbers: number[] = sections.map((section) => section.section_id);
-      const initialPath = this.greedyPath(currentSection, sectionNumbers);
+      const initialPath = this.greedyPath(currentSection, sections);
       const optimizedPath = this.twoOpt(initialPath);
 
+      console.log('opti: ', optimizedPath);
       return optimizedPath;
-    } catch (error: any) {
-      console.error('Error:', error.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error: ', error.message);
+      } else {
+        console.error('Error: ', error);
+      }
     }
   }
 

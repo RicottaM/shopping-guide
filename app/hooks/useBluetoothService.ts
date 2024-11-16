@@ -21,7 +21,6 @@ export function useBluetoothService() {
 
   const getAppData = useGetAppData();
 
-  // Kalman filter variables for RSSI
   const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
   const kalmanStateRef = useRef<{ [key: string]: number }>({});
   const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
@@ -81,16 +80,13 @@ export function useBluetoothService() {
       setIsScanning(false);
     } else {
       if (Platform.OS === 'android' && Platform.Version >= 23) {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'Bluetooth Low Energy requires Location permission',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+          title: 'Location Permission',
+          message: 'Bluetooth Low Energy requires Location permission',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        });
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
           return;
         }
@@ -106,7 +102,7 @@ export function useBluetoothService() {
         }
 
         if (scannedDevice && scannedDevice.name === 'HMSoft') {
-          const macAddress = scannedDevice.id.toUpperCase(); // Adjust identifier as necessary
+          const macAddress = scannedDevice.id.toUpperCase();
 
           if (!deviceSetRef.current.has(macAddress)) {
             deviceSetRef.current.add(macAddress);
@@ -176,13 +172,7 @@ export function useBluetoothService() {
     estimatedDistancesRef.current[identifier] = estimatedDistance;
 
     // Update the device's filtered RSSI value
-    setDevices((prevDevices) =>
-      prevDevices.map((device) =>
-        device.id === identifier
-          ? { ...device, filteredRssi: updatedState }
-          : device
-      )
-    );
+    setDevices((prevDevices) => prevDevices.map((device) => (device.id === identifier ? { ...device, filteredRssi: updatedState } : device)));
   };
 
   const estimateAndUpdatePosition = () => {

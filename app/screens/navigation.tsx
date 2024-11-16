@@ -7,16 +7,14 @@ import { FontAwesome5, MaterialCommunityIcons, FontAwesome } from '@expo/vector-
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { useGetAppData } from '../hooks/useGetAppData';
-import TestSvg from '../../assets/svg/test.svg';
 import ChatBubble from '../components/ChatBubble';
+import PathFindingService from '../services/PathFindingService';
 import { Edge } from '../models/edge.model';
-import { theme } from '../utils/theme';
-import Map from '../../assets/svg/stores/store1.svg';
+import EtiMap from '../../assets/svg/stores/EtiStore';
 
 export default function Navigation() {
   const { devices, isScanning, scanDevices } = useBluetoothService();
   const [currentLocation, setCurrentLocation] = useState<number | null>(null);
-  const [edges, setEdges] = useState<Edge[]>();
   const navigation = useNavigation();
   const router = useRouter();
   const handleRouteChange = useHandleRouteChange();
@@ -31,18 +29,17 @@ export default function Navigation() {
   useEffect(() => {
     // Start scanning when the component mounts
     scanDevices();
-  
+
     // Subscribe to currentLocation updates
     const subscription = positionService.currentLocation$.subscribe(
       (location) => {
-        console.log('Current location updated:', location);
         setCurrentLocation(location);
       },
       (error) => {
         console.error('Error in PositionService subscription:', error);
       }
     );
-  
+
     // Clean up the subscription when component unmounts
     return () => {
       subscription.unsubscribe();
@@ -76,7 +73,7 @@ export default function Navigation() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.mapContainer}>
-          <Map />
+          <EtiMap currentLocation={currentLocation} />
         </View>
       </ScrollView>
 
@@ -98,7 +95,6 @@ export default function Navigation() {
     </View>
   );
 }
-const windowHeight = Dimensions.get('window').height; // Wysokość ekranu
 
 const styles = StyleSheet.create({
   container: {
