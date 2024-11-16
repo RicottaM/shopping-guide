@@ -85,4 +85,21 @@ export const cartService = {
     
     return sectionIds.rows;
   },
+  getProductsByUserId: async (userId) => {
+    const cart = await client.query(`SELECT cart_id FROM carts WHERE user_id = ${userId};`);
+    if (!cart.rows.length) {
+      throw new ErrorWithStatus(`Couldn't find any cart for user with given id: ${userId}.`, 404);
+    }
+    const cartId = cart.rows[0].cart_id;
+    const cartItems = await client.query(`SELECT * FROM cart_items WHERE cart_id = ${cartId};`);
+    if (!cartItems.rows.length) {
+      throw new ErrorWithStatus(`Couldn't find any cart item in cart with given id: ${cartId}.`, 404);
+    }
+    const productIds = cartItems.rows.map((item) => item.product_id);
+    const products = await client.query(`SELECT * FROM products WHERE product_id IN (${productIds.join(',')});`);
+    if (!products.rows.length) {
+      throw new ErrorWithStatus(`Couldn't find any products for the given cart id: ${cartId}.`, 404);
+    }
+    return products.rows;
+  },
 };

@@ -61,5 +61,14 @@ export const cartController = {
     } catch (error) {
         next(error);
     }
-}
+  },
+  getProductsByUserId: async (req, res, next) => { // New method
+    try {
+      const userId = req.params.userId;
+      const products = await cartService.getProductsByUserId(userId);
+      res.json(products);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
