@@ -24,14 +24,18 @@ export function useBluetoothService() {
   const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
   const kalmanStateRef = useRef<{ [key: string]: number }>({});
   const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
-  const processNoise = 0.01; // Process noise covariance for RSSI
-  const measurementNoise = 0.5; // Measurement noise covariance for RSSI
+  const processNoise = 1.0; // Increase to allow filter to adapt quickly
+  const measurementNoise = 1.5; // Increase to smooth out noisy measurements
+
+
 
   // Kalman filter variables for position
   const positionStateRef = useRef<number>(0);
   const positionCovarianceRef = useRef<number>(100);
-  const processNoisePosition = 0.5; // Adjust as needed
-  const measurementNoisePosition = 0.2; // Adjust as needed
+  const processNoisePosition = 10.0; // Increase for faster responsiveness
+  const measurementNoisePosition = 0.1; // Decrease to trust measurements more
+
+
 
   // Store estimated distances to beacons
   const estimatedDistancesRef = useRef<{ [key: string]: number }>({});
@@ -138,7 +142,7 @@ export function useBluetoothService() {
 
       scanIntervalRef.current = setInterval(() => {
         estimateAndUpdatePosition();
-      }, 250);
+      }, 100);
 
       setIsScanning(true);
     }
@@ -233,26 +237,20 @@ export function useBluetoothService() {
     return estimatedPosition;
   };
 
-  const threshold = 1.0; // Próg dla resetowania filtra
-
   const updatePositionKalmanFilter = (observation: number) => {
-    if (Math.abs(observation - positionStateRef.current) > threshold) {
-      positionStateRef.current = observation;
-      positionCovarianceRef.current = 100; // Resetujemy kowariancję
-    } else {
-      // Standardowy krok filtra Kalmana
-      let predictedState = positionStateRef.current;
-      let predictedCovariance = positionCovarianceRef.current + processNoisePosition;
+    // Prediction step
+    let predictedState = positionStateRef.current;
+    let predictedCovariance = positionCovarianceRef.current + processNoisePosition;
 
-      const kGain = predictedCovariance / (predictedCovariance + measurementNoisePosition);
-      const updatedState = predictedState + kGain * (observation - predictedState);
-      const updatedCovariance = (1 - kGain) * predictedCovariance;
+    // Measurement update step
+    const kGain = predictedCovariance / (predictedCovariance + measurementNoisePosition);
+    const updatedState = predictedState + kGain * (observation - predictedState);
+    const updatedCovariance = (1 - kGain) * predictedCovariance;
 
-      positionStateRef.current = updatedState;
-      positionCovarianceRef.current = updatedCovariance;
-    }
+    // Save updated state and covariance
+    positionStateRef.current = updatedState;
+    positionCovarianceRef.current = updatedCovariance;
   };
-
 
   useEffect(() => {
     return () => {
