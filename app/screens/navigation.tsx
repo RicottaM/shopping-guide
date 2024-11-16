@@ -2,7 +2,6 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Button, FlatList, Text, Dimensions, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useBluetoothService } from '../hooks/useBluetoothService';
 import positionService from '../services/PositionService';
-import StoreMap from './nav'; // Import mapy sklepu
 import { useNavigation, useRouter } from 'expo-router';
 import { FontAwesome5, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { Screens } from '../enum/screens';
@@ -32,24 +31,19 @@ export default function Navigation() {
   useEffect(() => {
     // Start scanning when the component mounts
     scanDevices();
-
-    // Subskrybuj tylko raz przy montowaniu komponentu
+  
+    // Subscribe to currentLocation updates
     const subscription = positionService.currentLocation$.subscribe(
       (location) => {
-        // Zaktualizuj stan tylko, jeśli lokalizacja jest różna od bieżącej
-        setCurrentLocation((prevLocation) => {
-          if (prevLocation !== location) {
-            return location;
-          }
-          return prevLocation;
-        });
+        console.log('Current location updated:', location);
+        setCurrentLocation(location);
       },
       (error) => {
-        console.error('Błąd w subskrypcji PositionService:', error);
+        console.error('Error in PositionService subscription:', error);
       }
     );
-
-    // Oczyść subskrypcję po odmontowaniu komponentu
+  
+    // Clean up the subscription when component unmounts
     return () => {
       subscription.unsubscribe();
     };
@@ -59,7 +53,7 @@ export default function Navigation() {
     const getEdges = async () => {
       try {
         const storeId = await getAppData('selectedStoreId');
-        const edges = await fetch(`http://172.20.10.3:3000/edges/${storeId}`);
+        const edges = await fetch(`http://172.20.10.7:3000/edges/${storeId}`);
         const edgesData = await edges.json();
 
         setEdges(edgesData);
