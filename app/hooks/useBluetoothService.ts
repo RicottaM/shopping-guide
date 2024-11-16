@@ -21,12 +21,11 @@ export function useBluetoothService() {
 
   const getAppData = useGetAppData();
 
-  // Kalman filter variables
   const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
   const kalmanStateRef = useRef<{ [key: string]: number }>({});
   const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
-  const processNoise = 0.008; // process noise covariance
-  const measurementNoise = 1; // measurement noise covariance
+  const processNoise = 0.008;
+  const measurementNoise = 1;
 
   useEffect(() => {
     const fetchBleDevices = async () => {
@@ -35,7 +34,7 @@ export function useBluetoothService() {
         const bleDevicesResponse = await fetch(`http://172.20.10.7:3000/ble_devices/${storeId}`);
         const bleDevicesData = await bleDevicesResponse.json();
 
-        setBleDevices(bleDevicesData);
+        return bleDevicesData;
       } catch (error) {
         if (error instanceof Error) {
           console.error('An error occurred while getting BLE devices: ', error.message);
@@ -95,6 +94,8 @@ export function useBluetoothService() {
           console.error('Device scan error:', error);
           return;
         }
+
+        console.log('Scanned device: ', scannedDevice);
 
         if (scannedDevice && scannedDevice.name === 'HMSoft') {
           // For Android, scannedDevice.id may not be the MAC address
