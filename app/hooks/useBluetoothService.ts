@@ -12,27 +12,36 @@ import { BleDevice } from '../models/bleDevice.model';
 export function useBluetoothService() {
   const [devices, setDevices] = useState<ScannedDevice[]>([]);
   const [isScanning, setIsScanning] = useState<boolean>(false);
-  const [macToNameMapping, setMacToNameMapping] = useState<{ [key: string]: number }>({});
+  const [macToPositionMapping, setMacToPositionMapping] = useState<{ [key: string]: number }>({});
   const [bleDevices, setBleDevices] = useState<BleDevice[]>();
 
   const deviceSetRef = useRef<Set<string>>(new Set());
   const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const macToNameMappingRef = useRef<{ [key: string]: number }>({});
+  const macToPositionMappingRef = useRef<{ [key: string]: number }>({});
 
   const getAppData = useGetAppData();
 
-  // Kalman filter variables
+  // Kalman filter variables for RSSI
   const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
   const kalmanStateRef = useRef<{ [key: string]: number }>({});
   const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
-  const processNoise = 0.008; // process noise covariance
-  const measurementNoise = 1; // measurement noise covariance
+  const processNoise = 0.01; // Process noise covariance for RSSI
+  const measurementNoise = 0.5; // Measurement noise covariance for RSSI
+
+  // Kalman filter variables for position
+  const positionStateRef = useRef<number>(0);
+  const positionCovarianceRef = useRef<number>(100);
+  const processNoisePosition = 0.5; // Adjust as needed
+  const measurementNoisePosition = 0.2; // Adjust as needed
+
+  // Store estimated distances to beacons
+  const estimatedDistancesRef = useRef<{ [key: string]: number }>({});
 
   useEffect(() => {
     const fetchBleDevices = async () => {
       try {
         const storeId = await getAppData('selectedStoreId');
-        const bleDevicesResponse = await fetch(`http://172.20.10.7:3000/ble_devices/${storeId}`);
+        const bleDevicesResponse = await fetch(`http://172.20.10.4:3000/ble_devices/${storeId}`);
         const bleDevicesData = await bleDevicesResponse.json();
 
         setBleDevices(bleDevicesData);
@@ -53,12 +62,12 @@ export function useBluetoothService() {
       const mapping: { [key: string]: number } = {};
 
       bleDevices.forEach((device) => {
-        // Convert MAC addresses to uppercase to match with scanned devices
-        mapping[device.mac.toUpperCase()] = device.section_id;
+        // Map MAC addresses to their positions along the line (in meters)
+        mapping[device.mac.toUpperCase()] = device.section_id * 1.0; // Assuming each section is 1 meter apart
       });
 
-      setMacToNameMapping(mapping);
-      macToNameMappingRef.current = mapping; // Update the ref
+      setMacToPositionMapping(mapping);
+      macToPositionMappingRef.current = mapping; // Update the ref
     }
   }, [bleDevices]);
 
@@ -97,8 +106,6 @@ export function useBluetoothService() {
         }
 
         if (scannedDevice && scannedDevice.name === 'HMSoft') {
-          // For Android, scannedDevice.id may not be the MAC address
-          // Use scannedDevice.address if available, or adjust as needed
           const macAddress = scannedDevice.id.toUpperCase(); // Adjust identifier as necessary
 
           if (!deviceSetRef.current.has(macAddress)) {
@@ -131,26 +138,7 @@ export function useBluetoothService() {
       });
 
       scanIntervalRef.current = setInterval(() => {
-        setDevices((prevDevices) => {
-          const sortedDevices = [...prevDevices].sort((a, b) => {
-            return (b.filteredRssi ?? 0) - (a.filteredRssi ?? 0);
-          });
-
-          if (sortedDevices.length >= 1) {
-            const topDevice = sortedDevices[0];
-            const macAddress = topDevice.id;
-
-            if (macToNameMappingRef.current) {
-              const mappedName = macToNameMappingRef.current[macAddress];
-
-              if (mappedName !== undefined) {
-                positionService.updateLocation(mappedName);
-              }
-            }
-          }
-
-          return sortedDevices;
-        });
+        estimateAndUpdatePosition();
       }, 500);
 
       setIsScanning(true);
@@ -159,14 +147,13 @@ export function useBluetoothService() {
 
   const applyKalmanFilter = (identifier: string, rssi: number) => {
     if (kalmanStateRef.current[identifier] === undefined) {
-      // Initialize Kalman filter state and covariance if not already present
       kalmanStateRef.current[identifier] = rssi;
-      kalmanCovarianceRef.current[identifier] = 1;
+      kalmanCovarianceRef.current[identifier] = 100; // Increased from 1 to 100
       rssiMeasurementsRef.current[identifier] = [];
     }
 
     // Add new RSSI measurement to history
-    rssiMeasurementsRef.current[identifier].push(rssi);
+    //rssiMeasurementsRef.current[identifier].push(rssi);
 
     // Prediction step
     let predictedState = kalmanStateRef.current[identifier];
@@ -181,6 +168,13 @@ export function useBluetoothService() {
     kalmanStateRef.current[identifier] = updatedState;
     kalmanCovarianceRef.current[identifier] = updatedCovariance;
 
+    // Estimate distance from filtered RSSI
+    const A = -59; // Reference RSSI at 1 meter (calibrate for your environment)
+    const n = 2; // Path loss exponent (adjust based on environment)
+    const estimatedDistance = Math.pow(10, (A - updatedState) / (10 * n));
+
+    estimatedDistancesRef.current[identifier] = estimatedDistance;
+
     // Update the device's filtered RSSI value
     setDevices((prevDevices) =>
       prevDevices.map((device) =>
@@ -189,6 +183,64 @@ export function useBluetoothService() {
           : device
       )
     );
+  };
+
+  const estimateAndUpdatePosition = () => {
+    const estimatedPosition = estimatePosition();
+
+    if (estimatedPosition !== undefined && !isNaN(estimatedPosition)) {
+      updatePositionKalmanFilter(estimatedPosition);
+
+      // Update the position service with the smoothed position
+      positionService.updateLocation(positionStateRef.current);
+    }
+  };
+
+  const estimatePosition = () => {
+    const estimatedDistances = estimatedDistancesRef.current;
+    const positions = macToPositionMappingRef.current;
+
+    const weightsAndPositions = Object.keys(estimatedDistances)
+      .map((mac) => {
+        const distance = estimatedDistances[mac];
+        const position = positions[mac];
+        if (distance && position !== undefined) {
+          const weight = 1 / Math.pow(distance, 2); // Weight inversely proportional to distance squared
+          return { weight, position };
+        } else {
+          return null;
+        }
+      })
+      .filter((item) => item !== null) as { weight: number; position: number }[];
+
+    if (weightsAndPositions.length === 0) {
+      return undefined;
+    }
+
+    const totalWeight = weightsAndPositions.reduce((sum, item) => sum + item.weight, 0);
+    const weightedPositionSum = weightsAndPositions.reduce(
+      (sum, item) => sum + item.weight * item.position,
+      0
+    );
+
+    const estimatedPosition = weightedPositionSum / totalWeight;
+
+    return estimatedPosition;
+  };
+
+  const updatePositionKalmanFilter = (observation: number) => {
+    // Prediction step
+    let predictedState = positionStateRef.current;
+    let predictedCovariance = positionCovarianceRef.current + processNoisePosition;
+
+    // Measurement update step
+    const kGain = predictedCovariance / (predictedCovariance + measurementNoisePosition);
+    const updatedState = predictedState + kGain * (observation - predictedState);
+    const updatedCovariance = (1 - kGain) * predictedCovariance;
+
+    // Save updated state and covariance
+    positionStateRef.current = updatedState;
+    positionCovarianceRef.current = updatedCovariance;
   };
 
   useEffect(() => {
