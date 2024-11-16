@@ -14,7 +14,7 @@ import { Edge } from '../models/edge.model';
 import { theme } from '../utils/theme';
 import Map from '../../assets/svg/stores/store1.svg';
 
-export default function BluetoothScanner() {
+export default function Navigation() {
   const { devices, isScanning, scanDevices } = useBluetoothService();
   const [currentLocation, setCurrentLocation] = useState<number | null>(null);
   const [edges, setEdges] = useState<Edge[]>();
@@ -63,8 +63,6 @@ export default function BluetoothScanner() {
         const edgesData = await edges.json();
 
         setEdges(edgesData);
-
-        console.log(edgesData);
       } catch (error) {
         if (error instanceof Error) {
           console.error('An error occured while getting edges: ', error.message);
