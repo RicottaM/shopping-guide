@@ -9,6 +9,42 @@ import { ScannedDevice } from '../types/ScannedDevice';
 import { useGetAppData } from './useGetAppData';
 import { BleDevice } from '../models/bleDevice.model';
 
+class KalmanFilter {
+  private processNoise: number;
+  private measurementNoise: number;
+  private state: { [key: string]: number };
+  private covariance: { [key: string]: number };
+
+  constructor(processNoise: number, measurementNoise: number) {
+    this.processNoise = processNoise;
+    this.measurementNoise = measurementNoise;
+    this.state = {};
+    this.covariance = {};
+  }
+
+  apply(identifier: string, measurement: number): number {
+    if (this.state[identifier] === undefined) {
+      this.state[identifier] = measurement;
+      this.covariance[identifier] = 1;
+    }
+
+    // Prediction step
+    let predictedState = this.state[identifier];
+    let predictedCovariance = this.covariance[identifier] + this.processNoise;
+
+    // Measurement update step
+    const kGain = predictedCovariance / (predictedCovariance + this.measurementNoise);
+    const updatedState = predictedState + kGain * (measurement - predictedState);
+    const updatedCovariance = (1 - kGain) * predictedCovariance;
+
+    // Save updated state and covariance
+    this.state[identifier] = updatedState;
+    this.covariance[identifier] = updatedCovariance;
+
+    return updatedState;
+  }
+}
+
 export function useBluetoothService() {
   const [devices, setDevices] = useState<ScannedDevice[]>([]);
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -21,11 +57,7 @@ export function useBluetoothService() {
 
   const getAppData = useGetAppData();
 
-  const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
-  const kalmanStateRef = useRef<{ [key: string]: number }>({});
-  const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
-  const processNoise = 0.008;
-  const measurementNoise = 1;
+  const kalmanFilter = useRef(new KalmanFilter(0.008, 1)).current;
 
   useEffect(() => {
     const fetchBleDevices = async () => {
@@ -119,7 +151,10 @@ export function useBluetoothService() {
           }
 
           if (scannedDevice.rssi !== null) {
-            applyKalmanFilter(macAddress, scannedDevice.rssi);
+            const filteredRssi = kalmanFilter.apply(macAddress, scannedDevice.rssi);
+            setDevices((prevDevices) =>
+              prevDevices.map((device) => (device.id === macAddress ? { ...device, filteredRssi } : device))
+            );
           }
         }
       });
@@ -149,34 +184,6 @@ export function useBluetoothService() {
 
       setIsScanning(true);
     }
-  };
-
-  const applyKalmanFilter = (identifier: string, rssi: number) => {
-    if (kalmanStateRef.current[identifier] === undefined) {
-      // Initialize Kalman filter state and covariance if not already present
-      kalmanStateRef.current[identifier] = rssi;
-      kalmanCovarianceRef.current[identifier] = 1;
-      rssiMeasurementsRef.current[identifier] = [];
-    }
-
-    // Add new RSSI measurement to history
-    rssiMeasurementsRef.current[identifier].push(rssi);
-
-    // Prediction step
-    let predictedState = kalmanStateRef.current[identifier];
-    let predictedCovariance = kalmanCovarianceRef.current[identifier] + processNoise;
-
-    // Measurement update step
-    const kGain = predictedCovariance / (predictedCovariance + measurementNoise);
-    const updatedState = predictedState + kGain * (rssi - predictedState);
-    const updatedCovariance = (1 - kGain) * predictedCovariance;
-
-    // Save updated state and covariance
-    kalmanStateRef.current[identifier] = updatedState;
-    kalmanCovarianceRef.current[identifier] = updatedCovariance;
-
-    // Update the device's filtered RSSI value
-    setDevices((prevDevices) => prevDevices.map((device) => (device.id === identifier ? { ...device, filteredRssi: updatedState } : device)));
   };
 
   useEffect(() => {
