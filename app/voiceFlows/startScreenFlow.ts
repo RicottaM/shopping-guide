@@ -1,38 +1,37 @@
-// STARTSCREENFLOW.TS CONTEXT (Updated to use backticks for interpolation if needed)
-import { Screens } from "../enum/screens";
+import { Screens } from '../enum/screens';
 
 export const startScreenFlow = (handleRouteChange: any, username: string) => ({
-    intro: {
-        message: 'Witaj w aplikacji Shopper. Znajdujesz się na ekranie startowym.',
-        next: 'promptStart',
+  intro: {
+    message: 'Welcome to the Shopper app. You are currently on the start screen.',
+    next: 'promptStart',
+  },
+  promptStart: {
+    message: 'Say "start" to begin.',
+    options: [
+      {
+        command: 'start',
+        next: 'handleStart',
+      },
+    ],
+    onFailure: 'handleUnknownCommand',
+    onSilence: 'handleSilence',
+  },
+  handleStart: {
+    message: 'Got it, moving forward.',
+    action: () => {
+      if (username) {
+        handleRouteChange(Screens.Categories);
+      } else {
+        handleRouteChange(Screens.Login);
+      }
     },
-    promptStart: {
-        message: 'Powiedz "rozpocznij", aby skorzystać z aplikacji.',
-        options: [
-            {
-                command: 'rozpocznij',
-                next: 'handleStart',
-            },
-        ],
-        onFailure: 'handleUnknownCommand',
-        onSilence: 'handleSilence',
-    },
-    handleStart: {
-        message: 'Jasne, przechodzę dalej.',
-        action: () => {
-            if (username) {
-                handleRouteChange(Screens.User);
-            } else {
-                handleRouteChange(Screens.Login);
-            }
-        },
-    },
-    handleUnknownCommand: {
-        message: 'Nieznana komenda. Dostępna opcja to: "rozpocznij".',
-        repeat: 'promptStart',
-    },
-    handleSilence: {
-        message: 'Nie usłyszałem Cię, proszę powtórz.',
-        repeat: 'promptStart',
-    },
+  },
+  handleUnknownCommand: {
+    message: 'Unknown command. The available option is: "start".',
+    repeat: 'promptStart',
+  },
+  handleSilence: {
+    message: 'I did not hear you. Please repeat.',
+    repeat: 'promptStart',
+  },
 });

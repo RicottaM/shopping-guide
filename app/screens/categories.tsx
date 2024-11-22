@@ -75,7 +75,7 @@ export default function Categories() {
         <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Map)}>
           <FontAwesome5 name="map-marked-alt" size={32} color="#013b3d" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} onPress={() => router.navigate('/')}>
+        <TouchableOpacity style={styles.navButton} onPress={() => router.push('/')}>
           <FontAwesome5 name="home" size={32} color="#013b3d" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Cart)}>

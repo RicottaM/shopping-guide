@@ -26,18 +26,14 @@ export default function Home() {
   }, [navigation]);
 
   useEffect(() => {
-    (async () => {
-      const userData = await getAppData('username');
-      setUsername(userData);
-    })();
-  }, []);
-
-  useEffect(() => {
     startVoiceFlow();
   }, []);
 
   const startVoiceFlow = async () => {
-    const flow = startScreenFlow(handleRouteChange, username);
+    const userData = await getAppData('username');
+    setUsername(userData);
+
+    const flow = startScreenFlow(handleRouteChange, userData);
     await traverseFlow(flow, 'intro');
   };
 
@@ -51,14 +47,9 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/images/logo.png')}
-        style={styles.logo}
-      />
+      <Image source={require('../assets/images/logo.png')} style={styles.logo} />
       <Text style={styles.header}>Welcome to Shopper</Text>
-      <Text style={styles.paragraph}>
-        Fill your cart, follow the trail, and make your shopping faster!
-      </Text>
+      <Text style={styles.paragraph}>Fill your cart, follow the trail, and make your shopping faster!</Text>
       <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
         <Text style={styles.buttonText}>Get Started</Text>
         <AntDesign name="right" size={24} style={styles.icon} />
