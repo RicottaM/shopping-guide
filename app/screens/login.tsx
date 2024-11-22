@@ -34,10 +34,13 @@ export default function Login() {
     const flow = loginScreenFlow(handleRouteChange, loginUser);
     await traverseFlow(flow, 'intro', { email: login, password }, (updatedContext) => {
       if (updatedContext.email !== undefined) {
-        setLogin(updatedContext.email);
+        setLogin(updatedContext.email.replace(/\s+/g, ''));
       }
       if (updatedContext.password !== undefined) {
-        setPassword(updatedContext.password);
+        setPassword(updatedContext.password.replace(/\s+/g, ''));
+      }
+      if (updatedContext.voiceCommand === 'register') {
+        handleRouteChange(Screens.Register);
       }
     });
   };
