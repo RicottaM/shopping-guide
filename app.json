@@ -17,6 +17,11 @@
       "bundleIdentifier": "michael-json"
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyA7PdPHInT9gOm-9SkmDpJpvYlGVRl-nFU"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo.png",
         "backgroundColor": "#e8fefd"
@@ -54,6 +59,9 @@
           "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"],
           "permissions": ["RECORD_AUDIO"]
         }
+      ],
+      [
+        "expo-sensors"
       ]
     ],
     "experiments": {
