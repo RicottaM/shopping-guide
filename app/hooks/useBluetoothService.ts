@@ -24,17 +24,16 @@ export function useBluetoothService() {
   const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
   const kalmanStateRef = useRef<{ [key: string]: number }>({});
   const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
-  const processNoise = 0.05;
-  const measurementNoise = 1.5;
+  const processNoise = 0.1;
+  const measurementNoise = 1.5; // 0.5 - 5.0
 
 
 
   // Kalman filter variables for position
   // const positionStateRef = useRef<number>(0);
-  // const positionCovarianceRef = useRef<number>(100);
-  // const processNoisePosition = 300.0; // Increase for faster responsiveness
-  // const measurementNoisePosition = 0.01; // Decrease to trust measurements more
-
+  // const positionCovarianceRef = useRef<number>(50); // Mniejsza początkowa niepewność
+  // const processNoisePosition = 50.0; // Umiarkowana wartość
+  // const measurementNoisePosition = 0.5; // Większe zaufanie do pomiarów
 
 
   // Store estimated distances to beacons
@@ -142,7 +141,7 @@ export function useBluetoothService() {
 
       scanIntervalRef.current = setInterval(() => {
         estimateAndUpdatePosition();
-      }, 100);
+      }, 50);
 
       setIsScanning(true);
     }
