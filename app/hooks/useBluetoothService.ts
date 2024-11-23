@@ -24,16 +24,16 @@ export function useBluetoothService() {
   const rssiMeasurementsRef = useRef<{ [key: string]: number[] }>({});
   const kalmanStateRef = useRef<{ [key: string]: number }>({});
   const kalmanCovarianceRef = useRef<{ [key: string]: number }>({});
-  const processNoise = 1.0; // Increase to allow filter to adapt quickly
-  const measurementNoise = 1.5; // Increase to smooth out noisy measurements
+  const processNoise = 0.05;
+  const measurementNoise = 1.5;
 
 
 
   // Kalman filter variables for position
-  const positionStateRef = useRef<number>(0);
-  const positionCovarianceRef = useRef<number>(100);
-  const processNoisePosition = 10.0; // Increase for faster responsiveness
-  const measurementNoisePosition = 0.1; // Decrease to trust measurements more
+  // const positionStateRef = useRef<number>(0);
+  // const positionCovarianceRef = useRef<number>(100);
+  // const processNoisePosition = 300.0; // Increase for faster responsiveness
+  // const measurementNoisePosition = 0.01; // Decrease to trust measurements more
 
 
 
@@ -44,7 +44,7 @@ export function useBluetoothService() {
     const fetchBleDevices = async () => {
       try {
         const storeId = await getAppData('selectedStoreId');
-        const bleDevicesResponse = await fetch(`http://172.20.10.4:3000/ble_devices/${storeId}`);
+        const bleDevicesResponse = await fetch(`http://172.20.10.2:3000/ble_devices/${storeId}`);
         const bleDevicesData = await bleDevicesResponse.json();
 
         setBleDevices(bleDevicesData);
@@ -169,8 +169,8 @@ export function useBluetoothService() {
     kalmanCovarianceRef.current[identifier] = updatedCovariance;
 
     // Estimate distance from filtered RSSI
-    const A = -65; // Reference RSSI at 1 meter (calibrate for your environment)
-    const n = 2; // Path loss exponent (adjust based on environment)
+    const A = -60; // Reference RSSI at 1 meter (calibrate for your environment)
+    const n = 1.9; // Path loss exponent (adjust based on environment)
     const estimatedDistance = Math.pow(10, (A - updatedState) / (10 * n));
 
     estimatedDistancesRef.current[identifier] = estimatedDistance;
@@ -189,21 +189,19 @@ export function useBluetoothService() {
     const estimatedPosition = estimatePosition();
 
     if (estimatedPosition !== undefined && !isNaN(estimatedPosition)) {
-      updatePositionKalmanFilter(estimatedPosition);
-
-      console.log(positionStateRef.current);
       // Zaokrąglamy pozycję do najbliższej sekcji
-      const roundedPosition = Math.round(positionStateRef.current);
+      const roundedPosition = Math.round(estimatedPosition);
 
       // Upewniamy się, że pozycja mieści się w zakresie dostępnych sekcji
       const maxSectionId = Math.max(...Object.values(macToPositionMappingRef.current));
       const minSectionId = Math.min(...Object.values(macToPositionMappingRef.current));
       const clampedPosition = Math.min(Math.max(roundedPosition, minSectionId), maxSectionId);
 
-      // Update the position service with the smoothed and rounded position
+      // Aktualizuj pozycję bezpośrednio
       positionService.updateLocation(clampedPosition);
     }
   };
+
 
   const estimatePosition = () => {
     const estimatedDistances = estimatedDistancesRef.current;
@@ -237,20 +235,20 @@ export function useBluetoothService() {
     return estimatedPosition;
   };
 
-  const updatePositionKalmanFilter = (observation: number) => {
-    // Prediction step
-    let predictedState = positionStateRef.current;
-    let predictedCovariance = positionCovarianceRef.current + processNoisePosition;
+  // const updatePositionKalmanFilter = (observation: number) => {
+  //   // Prediction step
+  //   let predictedState = positionStateRef.current;
+  //   let predictedCovariance = positionCovarianceRef.current + processNoisePosition;
 
-    // Measurement update step
-    const kGain = predictedCovariance / (predictedCovariance + measurementNoisePosition);
-    const updatedState = predictedState + kGain * (observation - predictedState);
-    const updatedCovariance = (1 - kGain) * predictedCovariance;
+  //   // Measurement update step
+  //   const kGain = predictedCovariance / (predictedCovariance + measurementNoisePosition);
+  //   const updatedState = predictedState + kGain * (observation - predictedState);
+  //   const updatedCovariance = (1 - kGain) * predictedCovariance;
 
-    // Save updated state and covariance
-    positionStateRef.current = updatedState;
-    positionCovarianceRef.current = updatedCovariance;
-  };
+  //   // Save updated state and covariance
+  //   positionStateRef.current = updatedState;
+  //   positionCovarianceRef.current = updatedCovariance;
+  // };
 
   useEffect(() => {
     return () => {
@@ -270,5 +268,6 @@ export function useBluetoothService() {
     devices,
     isScanning,
     scanDevices,
+    currentFilteredPosition: estimatePosition()
   };
 }
