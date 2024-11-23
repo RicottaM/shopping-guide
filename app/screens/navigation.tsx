@@ -13,7 +13,7 @@ import { Edge } from '../models/edge.model';
 import EtiMap from '../../assets/svg/stores/EtiStore';
 
 export default function Navigation() {
-  const { devices, isScanning, scanDevices } = useBluetoothService();
+  const { devices, isScanning, scanDevices, currentFilteredPosition } = useBluetoothService();
   const [currentLocation, setCurrentLocation] = useState<number | null>(null);
   const navigation = useNavigation();
   const router = useRouter();
@@ -51,6 +51,11 @@ export default function Navigation() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.mapContainer}>
           <EtiMap currentLocation={currentLocation} />
+        </View>
+        <View style={styles.positionContainer}>
+          <Text style={styles.positionText}>
+            Filtered Position: {currentFilteredPosition?.toFixed(4) || 'N/A'}
+          </Text>
         </View>
       </ScrollView>
 
@@ -125,5 +130,17 @@ const styles = StyleSheet.create({
   backButtonContainer: {
     justifyContent: 'center',
     marginLeft: 40,
+  },
+  positionContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  positionText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#013b3d',
   },
 });
