@@ -11,6 +11,7 @@ import ChatBubble from '../components/ChatBubble';
 import PathFindingService from '../services/PathFindingService';
 import { Edge } from '../models/edge.model';
 import EtiMap from '../../assets/svg/stores/EtiStore';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function Navigation() {
   const { devices, isScanning, scanDevices, currentFilteredPosition } = useBluetoothService();
@@ -50,7 +51,7 @@ export default function Navigation() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.mapContainer}>
-          <EtiMap currentLocation={currentLocation} />
+          {currentLocation ? <EtiMap currentLocation={currentLocation} /> : <LoadingSpinner />}
         </View>
         <View style={styles.positionContainer}>
           <Text style={styles.positionText}>
