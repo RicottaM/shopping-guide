@@ -27,15 +27,6 @@ export function useBluetoothService() {
   const processNoise = 0.1;
   const measurementNoise = 1.5; // 0.5 - 5.0
 
-
-
-  // Kalman filter variables for position
-  // const positionStateRef = useRef<number>(0);
-  // const positionCovarianceRef = useRef<number>(50); // Mniejsza początkowa niepewność
-  // const processNoisePosition = 50.0; // Umiarkowana wartość
-  // const measurementNoisePosition = 0.5; // Większe zaufanie do pomiarów
-
-
   // Store estimated distances to beacons
   const estimatedDistancesRef = useRef<{ [key: string]: number }>({});
 
@@ -233,21 +224,6 @@ export function useBluetoothService() {
 
     return estimatedPosition;
   };
-
-  // const updatePositionKalmanFilter = (observation: number) => {
-  //   // Prediction step
-  //   let predictedState = positionStateRef.current;
-  //   let predictedCovariance = positionCovarianceRef.current + processNoisePosition;
-
-  //   // Measurement update step
-  //   const kGain = predictedCovariance / (predictedCovariance + measurementNoisePosition);
-  //   const updatedState = predictedState + kGain * (observation - predictedState);
-  //   const updatedCovariance = (1 - kGain) * predictedCovariance;
-
-  //   // Save updated state and covariance
-  //   positionStateRef.current = updatedState;
-  //   positionCovarianceRef.current = updatedCovariance;
-  // };
 
   useEffect(() => {
     return () => {
