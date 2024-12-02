@@ -48,13 +48,10 @@ const MapSvg: React.FC<MapSvgProps> = ({ currentLocation }) => {
 
   const getSectionColor = (sectionId: number) => {
     if (currentLocation === sectionId) {
-      // pole usera
       return theme.light;
     } else if (traceSections?.includes(sectionId)) {
-      // trasa
       return theme.sharpGreen;
     } else {
-      // pole sekcji
       return theme.darkGreen;
     }
   };

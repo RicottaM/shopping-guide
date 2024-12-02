@@ -10,6 +10,9 @@ import { useGetAppData } from '../hooks/useGetAppData';
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import ChatBubble from '../components/ChatBubble';
+import { Store } from '../models/store.model';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
+import { cartScreenFlow } from '../voiceFlows/cartScreenFlow';
 
 export default function Cart() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,6 +25,7 @@ export default function Cart() {
 
   const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
+  const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -65,6 +69,11 @@ export default function Cart() {
     setCartItemsByCart();
   }, []);
 
+  const startVoiceFlow = async (products: Product[]) => {
+    const flow = cartScreenFlow(products, handleRouteChange, removeFromCart);
+    await traverseFlow(flow, 'intro');
+  };
+
   useEffect(() => {
     const setProductsByCart = async () => {
       try {
@@ -77,12 +86,18 @@ export default function Cart() {
 
         setCartProducts(filteredCartProducts);
         setFilteredProducts(filteredCartProducts);
+
+        return filteredCartProducts || [];
       } catch (error) {
         console.error('Błąd podczas pobierania produktów:', error);
       }
     };
 
-    setProductsByCart();
+    setProductsByCart().then((products: Product[] | undefined) => {
+      if (products && products.length > 1) {
+        startVoiceFlow(products || []);
+      }
+    });
   }, [cartItems]);
 
   const handleSearch = (text: string) => {
@@ -156,8 +171,8 @@ export default function Cart() {
       </ScrollView>
 
       <View style={styles.navbar}>
-        <TouchableOpacity style={styles.navButton} onPress={() => router.back()}>
-          <FontAwesome5 name="arrow-circle-left" size={32} color="#013b3d" />
+        <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Categories)}>
+          <FontAwesome5 name="th-list" size={32} color="#013b3d" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Code)}>
           <MaterialCommunityIcons name="qrcode-scan" size={32} color="#013b3d" />

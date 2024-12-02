@@ -1,41 +1,78 @@
 import { Screens } from '../enum/screens';
 import { Category } from '../models/category.model';
 
-export const categoriesScreenFlow = (categories: Category[], handleRouteChange: any, router: any) => ({
-  intro: {
-    message: 'You are on the Categories screen. Here are the available options.',
-    next: 'listCategories',
-  },
-  listCategories: {
-    message: (context: any) =>
-      `Available categories are: ${categories.map((cat) => cat.category_name).join(', ')}. Say the name of a category to view its products, or choose one of the following options: Map, Cart, or User.`,
-    options: [
-      ...categories.map((category) => ({
-        command: category.category_name.toLowerCase(),
+export const categoriesScreenFlow = (categories: Category[], handleRouteChange: any, router: any) => {
+  const dynamicCategoryHandlers: Record<string, { message: string; action: () => void }> = categories.reduce(
+    (acc, category) => {
+      acc[`handle-${category.category_name}`] = {
+        message: `Moving to ${category.category_name}`,
         action: () => router.push(`/screens/products?categoryId=${category.category_id}`),
-      })),
-      {
-        command: 'map',
-        action: () => handleRouteChange(Screens.Map),
+      };
+      return acc;
+    },
+    {} as Record<string, { message: string; action: () => void }>
+  );
+
+  return {
+    intro: {
+      message: 'You are on the Categories screen.',
+      next: 'listCategories',
+    },
+    listCategories: {
+      message: `Say the name of a category to view its products or say 'Stores', 'Cart' or 'User' to visit other pages. Say 'categories' to get the categories list.`,
+      options: [
+        ...categories.map((category: Category) => ({
+          command: category.category_name.toLowerCase(),
+          next: `handle-${category.category_name}`,
+        })),
+        {
+          command: 'categories',
+          next: 'getCategories',
+        },
+        {
+          command: 'stores',
+          next: 'handleStores',
+        },
+        {
+          command: 'cart',
+          next: 'handleCart',
+        },
+        {
+          command: 'user',
+          next: 'handleUser',
+        },
+      ],
+      onFailure: 'handleUnknownCommand',
+      onSilence: 'handleSilence',
+    },
+    getCategories: {
+      message: () => {
+        const categoriesString = categories.map((category) => category.category_name).join(', ');
+        const messageString = `Available categories are: ${categoriesString}`;
+        return messageString;
       },
-      {
-        command: 'cart',
-        action: () => handleRouteChange(Screens.Cart),
-      },
-      {
-        command: 'user',
-        action: () => handleRouteChange(Screens.User),
-      },
-    ],
-    onFailure: 'handleUnknownCommand',
-    onSilence: 'handleSilence',
-  },
-  handleUnknownCommand: {
-    message: 'I did not understand your command. Please say a category name, or choose Map, Cart, or User.',
-    repeat: 'listCategories',
-  },
-  handleSilence: {
-    message: 'I did not hear your response. Please say a category name, or choose Map, Cart, or User.',
-    repeat: 'listCategories',
-  },
-});
+      repeat: 'listCategories',
+    },
+    handleUnknownCommand: {
+      message: 'I did not understand your command.',
+      repeat: 'listCategories',
+    },
+    handleSilence: {
+      message: 'I did not hear your response.',
+      repeat: 'listCategories',
+    },
+    handleStores: {
+      message: `Moving to Stores`,
+      action: () => handleRouteChange(Screens.Map),
+    },
+    handleCart: {
+      message: `Moving to Cart`,
+      action: () => handleRouteChange(Screens.Cart),
+    },
+    handleUser: {
+      message: `Moving to User`,
+      action: () => handleRouteChange(Screens.User),
+    },
+    ...dynamicCategoryHandlers,
+  };
+};

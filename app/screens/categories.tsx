@@ -8,6 +8,8 @@ import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { useGetAppData } from '../hooks/useGetAppData';
 import ChatBubble from '../components/ChatBubble';
+import { categoriesScreenFlow } from '../voiceFlows/categoriesScreenFlow';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
 
 export default function Categories() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,6 +20,7 @@ export default function Categories() {
 
   const handleRouteChange = useHandleRouteChange();
   const getAppData = useGetAppData();
+  const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -28,19 +31,28 @@ export default function Categories() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const storeId = await getAppData('selectedStoreId');
+        const storeId = (await getAppData('selectedStoreId')) || 1;
         const response = await fetch(`http://172.20.10.3:3000/stores/${storeId}/categories`);
         const data = await response.json();
 
         setCategories(data);
         setFilteredCategories(data);
+
+        return data;
       } catch (error) {
         console.error('Błąd podczas pobierania kategorii:', error);
       }
     };
 
-    fetchCategories();
+    fetchCategories().then((categories: Category[]) => {
+      startVoiceFlow(categories);
+    });
   }, []);
+
+  const startVoiceFlow = async (categories: Category[]) => {
+    const flow = categoriesScreenFlow(categories, handleRouteChange, router);
+    await traverseFlow(flow, 'intro');
+  };
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);

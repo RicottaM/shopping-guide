@@ -8,6 +8,8 @@ import { useGetAppData } from '../hooks/useGetAppData';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { ChatMessage } from '../models/chatMessage.model';
 import ChatBubble from '../components/ChatBubble';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
+import { userScreenFlow } from '../voiceFlows/userScreenFlow';
 
 export default function User() {
   const [username, setUsername] = useState('');
@@ -18,6 +20,7 @@ export default function User() {
 
   const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
+  const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -29,8 +32,14 @@ export default function User() {
     (async () => {
       const username = await getAppData('username');
       setUsername(username);
+      startVoiceFlow();
     })();
   }, []);
+
+  const startVoiceFlow = async () => {
+    const flow = userScreenFlow(handleRouteChange, handleLogout);
+    await traverseFlow(flow, 'intro');
+  };
 
   async function handleLogout() {
     await deleteUserData();

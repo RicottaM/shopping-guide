@@ -9,6 +9,9 @@ import { useGetAppData } from '../hooks/useGetAppData';
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import ChatBubble from '../components/ChatBubble';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
+import { Category } from '../models/category.model';
+import { productsScreenFlow } from '../voiceFlows/productsScreenFlow';
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,6 +26,7 @@ export default function Products() {
 
   const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
+  const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -38,6 +42,7 @@ export default function Products() {
 
         setProducts(data);
         setFilteredProducts(data);
+        return data;
       } catch (error) {
         console.error('Błąd podczas pobierania produktów:', error);
       }
@@ -55,8 +60,18 @@ export default function Products() {
     };
 
     fetchUnits();
-    fetchProductsByCategory();
+    fetchProductsByCategory().then((products: Product[]) => {
+      startVoiceFlow(products);
+    });
   }, []);
+
+  const startVoiceFlow = async (products: Product[]) => {
+    const response = await fetch('http://172.20.10.3:3000' + `/units`);
+    const data = await response.json();
+
+    const flow = productsScreenFlow(products, data, handleRouteChange, addToCartCommand);
+    await traverseFlow(flow, 'intro');
+  };
 
   const handleSearch = (text: string) => {
     setSearchQuery(text);
@@ -134,6 +149,35 @@ export default function Products() {
       }
     } catch (error) {
       console.error('Błąd:', error);
+    }
+  };
+
+  const addToCartCommand = async (product: Product, quantity: number) => {
+    try {
+      const carts = await fetch('http://172.20.10.3:3000/carts');
+      const cartsData = await carts.json();
+      const userId = await getAppData('userId');
+      const userCart = cartsData.find((cart: CartModel) => cart.user_id === userId);
+
+      const newCartItem = {
+        cart_id: userCart.cart_id,
+        product_id: product.product_id,
+        quantity: quantity,
+      };
+
+      const response = await fetch('http://172.20.10.3:3000' + '/cart-items', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newCartItem),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Błąd podczas dodawania do koszyka: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Błąd: ', error);
     }
   };
 

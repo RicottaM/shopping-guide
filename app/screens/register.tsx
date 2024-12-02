@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { FontAwesome, FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
@@ -6,13 +6,15 @@ import { Screens } from '../enum/screens';
 import { useGetAppData } from '../hooks/useGetAppData';
 import { useSaveAppData } from '../hooks/useSaveAppData';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
+import { registerScreenFlow } from '../voiceFlows/registerScreenFlow';
 
 export default function Register() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstname, setFirstname] = useState('');
+  const [lastname, setLastname] = useState('');
 
   const router = useRouter();
   const navigation = useNavigation();
@@ -20,6 +22,7 @@ export default function Register() {
   const getAppData = useGetAppData();
   const saveAppData = useSaveAppData();
   const handleRouteChange = useHandleRouteChange();
+  const { traverseFlow } = useVoiceFlow();
 
   const usernameMinLength = 3;
   const passwordMinLength = 8;
@@ -30,8 +33,12 @@ export default function Register() {
     });
   }, [navigation]);
 
+  useEffect(() => {
+    startVoiceRegisterFlow();
+  }, []);
+
   const validateData = () => {
-    if (firstName.length < usernameMinLength || lastName.length < usernameMinLength) {
+    if (firstname.length < usernameMinLength || lastname.length < usernameMinLength) {
       Alert.alert('First name and Last name must be at least 3 characters long');
       return false;
     }
@@ -54,6 +61,44 @@ export default function Register() {
     return true;
   };
 
+  const startVoiceRegisterFlow = async () => {
+    const flow = registerScreenFlow(handleRouteChange, handleRegisterCommand);
+    await traverseFlow(flow, 'intro', { login, password, firstname, lastname }, (updatedContext) => {
+      if (updatedContext.login !== undefined) setLogin(updatedContext.login.replace(/\s+/g, ''));
+      if (updatedContext.password !== undefined) setPassword(updatedContext.password.replace(/\s+/g, ''));
+      if (updatedContext.repeatPassword !== undefined) setRepeatPassword(updatedContext.password.replace(/\s+/g, ''));
+      if (updatedContext.firstname !== undefined) setFirstname(updatedContext.firstname);
+      if (updatedContext.lastname !== undefined) setLastname(updatedContext.lastname);
+    });
+  };
+
+  const handleRegisterCommand = async (login: string, firstname: string, lastname: string, password: string) => {
+    const response = await fetch('http://172.20.10.3:3000' + '/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: login,
+        password: password,
+        first_name: firstname,
+        last_name: lastname,
+      }),
+      credentials: 'include',
+    });
+
+    const authData = await response.json();
+
+    if (authData.user) {
+      await saveAppData('username', authData.user.first_name, 30);
+      await saveAppData('userId', authData.user.user_id, 30);
+
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   const handleRegister = async () => {
     if (!validateData()) return;
 
@@ -65,8 +110,8 @@ export default function Register() {
       body: JSON.stringify({
         email: login,
         password: password,
-        first_name: firstName,
-        last_name: lastName,
+        first_name: firstname,
+        last_name: lastname,
       }),
       credentials: 'include',
     });
@@ -97,10 +142,10 @@ export default function Register() {
 
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
-          <TextInput style={styles.input} placeholder="First name" selectionColor="#013b3d" value={firstName} onChangeText={setFirstName} />
+          <TextInput style={styles.input} placeholder="First name" selectionColor="#013b3d" value={firstname} onChangeText={setFirstname} />
         </View>
         <View style={styles.inputContainer}>
-          <TextInput style={styles.input} placeholder="Last name" selectionColor="#013b3d" value={lastName} onChangeText={setLastName} />
+          <TextInput style={styles.input} placeholder="Last name" selectionColor="#013b3d" value={lastname} onChangeText={setLastname} />
         </View>
         <View style={styles.inputContainer}>
           <TextInput

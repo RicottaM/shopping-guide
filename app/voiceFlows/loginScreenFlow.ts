@@ -1,16 +1,30 @@
-// LOGINSCREENFLOW.TS
 import { Screens } from '../enum/screens';
 
 export const loginScreenFlow = (handleRouteChange: any, loginUser: (email: string, password: string) => Promise<boolean>) => ({
   intro: {
-    message: 'You are on the login panel.',
-    next: 'promptEmail',
+    message: `You are on the login panel. Say 'email' to sign in or 'register' to sign up.`,
+    options: [
+      {
+        command: 'email',
+        next: 'promptEmail',
+      },
+      {
+        command: 'register',
+        next: 'promptRegister',
+      },
+    ],
+    onSilence: 'intro',
+    onFailure: 'intro',
   },
   promptEmail: {
     message: 'Please provide your email address, spelling it clearly.',
     onResponse: 'confirmEmail',
     onResponseKey: 'email',
     onSilence: 'handleEmailSilence',
+  },
+  promptRegister: {
+    message: 'Moving to register',
+    action: () => handleRouteChange(Screens.Register),
   },
   confirmEmail: {
     message: (context: any) => `I understood: ${context.email}. Is that correct? Say "yes" or "no".`,

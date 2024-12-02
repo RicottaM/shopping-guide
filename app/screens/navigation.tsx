@@ -56,8 +56,8 @@ export default function Navigation() {
 
       {/* Nawigacja na dole */}
       <View style={styles.navbar}>
-        <TouchableOpacity style={styles.navButton} onPress={() => router.back()}>
-          <FontAwesome5 name="arrow-circle-left" size={32} color="#013b3d" />
+        <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Categories)}>
+          <FontAwesome5 name="th-list" size={32} color="#013b3d" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} onPress={() => handleRouteChange(Screens.Code)}>
           <MaterialCommunityIcons name="qrcode-scan" size={32} color="#013b3d" />

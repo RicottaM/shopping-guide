@@ -1,4 +1,3 @@
-// Login.tsx
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -38,9 +37,6 @@ export default function Login() {
       }
       if (updatedContext.password !== undefined) {
         setPassword(updatedContext.password.replace(/\s+/g, ''));
-      }
-      if (updatedContext.voiceCommand === 'register') {
-        handleRouteChange(Screens.Register);
       }
     });
   };

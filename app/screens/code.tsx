@@ -8,6 +8,11 @@ import { Product } from '../models/product.model';
 import { CartModel } from '../models/cart.model';
 import { useGetAppData } from '../hooks/useGetAppData';
 import ChatBubble from '../components/ChatBubble';
+import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
+import { Screens } from '../enum/screens';
+import Products from './products';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
+import { codeScreenFlow } from '../voiceFlows/codeScreenFlow';
 
 export default function Code() {
   const navigation = useNavigation();
@@ -16,6 +21,8 @@ export default function Code() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [cartProducts, setCartProducts] = useState<Product[]>([]);
   const getAppData = useGetAppData();
+  const handleRouteChange = useHandleRouteChange();
+  const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -60,6 +67,15 @@ export default function Code() {
     fetchCartProducts();
   }, [cartItems]);
 
+  useEffect(() => {
+    startVoiceFlow();
+  }, []);
+
+  const startVoiceFlow = async () => {
+    const flow = codeScreenFlow(handleRouteChange);
+    await traverseFlow(flow, 'intro');
+  };
+
   function getProductsIds() {
     const productIds: number[] = [];
 
@@ -73,7 +89,7 @@ export default function Code() {
   return (
     <View style={styles.container}>
       <ChatBubble />
-      <TouchableOpacity style={styles.backButtonContainer} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButtonContainer} onPress={() => handleRouteChange(Screens.Cart)}>
         <MaterialIcons name="arrow-back-ios" size={32} color="#013b3d" />
       </TouchableOpacity>
       {cartProducts.length > 0 ? (
@@ -84,7 +100,7 @@ export default function Code() {
         </View>
       ) : (
         <View style={styles.codeContainer}>
-          <Text style={styles.noProductsText}>Add products to your cart.</Text>
+          <Text style={styles.noProductsText}></Text>
         </View>
       )}
     </View>

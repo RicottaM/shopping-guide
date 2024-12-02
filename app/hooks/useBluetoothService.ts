@@ -27,15 +27,11 @@ export function useBluetoothService() {
   const processNoise = 1.0; // Increase to allow filter to adapt quickly
   const measurementNoise = 1.5; // Increase to smooth out noisy measurements
 
-
-
   // Kalman filter variables for position
   const positionStateRef = useRef<number>(0);
   const positionCovarianceRef = useRef<number>(100);
   const processNoisePosition = 10.0; // Increase for faster responsiveness
   const measurementNoisePosition = 0.1; // Decrease to trust measurements more
-
-
 
   // Store estimated distances to beacons
   const estimatedDistancesRef = useRef<{ [key: string]: number }>({});
@@ -44,7 +40,7 @@ export function useBluetoothService() {
     const fetchBleDevices = async () => {
       try {
         const storeId = await getAppData('selectedStoreId');
-        const bleDevicesResponse = await fetch(`http://172.20.10.4:3000/ble_devices/${storeId}`);
+        const bleDevicesResponse = await fetch(`http://172.20.10.3:3000/ble_devices/${storeId}`);
         const bleDevicesData = await bleDevicesResponse.json();
 
         setBleDevices(bleDevicesData);
@@ -84,16 +80,13 @@ export function useBluetoothService() {
       setIsScanning(false);
     } else {
       if (Platform.OS === 'android' && Platform.Version >= 23) {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'Bluetooth Low Energy requires Location permission',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
+        const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION, {
+          title: 'Location Permission',
+          message: 'Bluetooth Low Energy requires Location permission',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        });
         if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
           return;
         }
@@ -126,9 +119,9 @@ export function useBluetoothService() {
               prevDevices.map((scanned) =>
                 scanned.id === macAddress
                   ? {
-                    ...scanned,
-                    filteredRssi: scannedDevice.rssi ?? scanned.filteredRssi,
-                  }
+                      ...scanned,
+                      filteredRssi: scannedDevice.rssi ?? scanned.filteredRssi,
+                    }
                   : scanned
               )
             );
@@ -176,13 +169,7 @@ export function useBluetoothService() {
     estimatedDistancesRef.current[identifier] = estimatedDistance;
 
     // Update the device's filtered RSSI value
-    setDevices((prevDevices) =>
-      prevDevices.map((device) =>
-        device.id === identifier
-          ? { ...device, filteredRssi: updatedState }
-          : device
-      )
-    );
+    setDevices((prevDevices) => prevDevices.map((device) => (device.id === identifier ? { ...device, filteredRssi: updatedState } : device)));
   };
 
   const estimateAndUpdatePosition = () => {
@@ -227,10 +214,7 @@ export function useBluetoothService() {
     }
 
     const totalWeight = weightsAndPositions.reduce((sum, item) => sum + item.weight, 0);
-    const weightedPositionSum = weightsAndPositions.reduce(
-      (sum, item) => sum + item.weight * item.position,
-      0
-    );
+    const weightedPositionSum = weightsAndPositions.reduce((sum, item) => sum + item.weight * item.position, 0);
 
     const estimatedPosition = weightedPositionSum / totalWeight;
 

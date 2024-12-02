@@ -9,9 +9,13 @@ import { Store } from '../models/store.model';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { Screens } from '../enum/screens';
 import ChatBubble from '../components/ChatBubble';
+import { useVoiceFlow } from '../hooks/useVoiceFlow';
+import { Category } from '../models/category.model';
+import { mapScreenFlow } from '../voiceFlows/mapScreenFlow';
 
 export default function Map() {
   const navigation = useNavigation();
+  const router = useRouter();
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<Store>();
   const [initialRegion, setInitialRegion] = useState({
@@ -23,6 +27,7 @@ export default function Map() {
 
   const saveAppData = useSaveAppData();
   const useRouteChange = useHandleRouteChange();
+  const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -33,6 +38,10 @@ export default function Map() {
   const handleSelectStore = async (storeId: number) => {
     await saveAppData('selectedStoreId', storeId.toString(), 7);
     Alert.alert(`Store has been selected successfully`);
+  };
+
+  const selectStoreCommand = async (storeId: number) => {
+    await saveAppData('selectedStoreId', storeId.toString(), 7);
   };
 
   useEffect(() => {
@@ -57,13 +66,22 @@ export default function Map() {
             longitudeDelta: 0.05,
           });
         }
+
+        return data;
       } catch (error) {
         console.log('Fetching stores failed.');
       }
     };
 
-    fetchStores();
+    fetchStores().then((stores: Store[] | undefined) => {
+      startVoiceFlow(stores || []);
+    });
   }, []);
+
+  const startVoiceFlow = async (stores: Store[]) => {
+    const flow = mapScreenFlow(stores, useRouteChange, selectStoreCommand);
+    await traverseFlow(flow, 'intro');
+  };
 
   return (
     <View style={styles.container}>

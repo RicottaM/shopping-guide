@@ -20,6 +20,7 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@react-navigation/stack": "^6.4.1",
+    "dotenv": "^16.4.5",
     "expo": "~51.0.16",
     "expo-constants": "~16.0.2",
     "expo-dev-client": "~4.0.28",
@@ -27,6 +28,7 @@
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.23",
     "expo-secure-store": "^13.0.2",
+    "expo-sensors": "^14.0.1",
     "expo-speech": "~12.0.2",
     "expo-speech-recognition": "^0.2.24",
     "expo-splash-screen": "~0.27.5",
@@ -49,7 +51,8 @@
     "react-native-tts": "^4.1.1",
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.10",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "words-to-numbers": "^1.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
