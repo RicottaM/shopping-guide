@@ -9,7 +9,7 @@ import { Store } from '../models/store.model';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { Screens } from '../enum/screens';
 import ChatBubble from '../components/ChatBubble';
-import { useVoiceFlow } from '../hooks/useVoiceFlow';
+//import { useVoiceFlow } from '../hooks/useVoiceFlow';
 import { Category } from '../models/category.model';
 import { mapScreenFlow } from '../voiceFlows/mapScreenFlow';
 
@@ -27,7 +27,7 @@ export default function Map() {
 
   const saveAppData = useSaveAppData();
   const useRouteChange = useHandleRouteChange();
-  const { traverseFlow } = useVoiceFlow();
+  //const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -80,7 +80,7 @@ export default function Map() {
 
   const startVoiceFlow = async (stores: Store[]) => {
     const flow = mapScreenFlow(stores, useRouteChange, selectStoreCommand);
-    await traverseFlow(flow, 'intro');
+    //await traverseFlow(flow, 'intro');
   };
 
   return (

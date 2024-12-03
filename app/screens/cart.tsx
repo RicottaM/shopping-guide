@@ -11,7 +11,7 @@ import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import ChatBubble from '../components/ChatBubble';
 import { Store } from '../models/store.model';
-import { useVoiceFlow } from '../hooks/useVoiceFlow';
+//import { useVoiceFlow } from '../hooks/useVoiceFlow';
 import { cartScreenFlow } from '../voiceFlows/cartScreenFlow';
 
 export default function Cart() {
@@ -25,7 +25,7 @@ export default function Cart() {
 
   const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
-  const { traverseFlow } = useVoiceFlow();
+  //const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -71,7 +71,7 @@ export default function Cart() {
 
   const startVoiceFlow = async (products: Product[]) => {
     const flow = cartScreenFlow(products, handleRouteChange, removeFromCart);
-    await traverseFlow(flow, 'intro');
+    //await traverseFlow(flow, 'intro');
   };
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import { Screens } from '../enum/screens';
 import { useGetAppData } from '../hooks/useGetAppData';
 import { useSaveAppData } from '../hooks/useSaveAppData';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
-import { useVoiceFlow } from '../hooks/useVoiceFlow';
+//import { useVoiceFlow } from '../hooks/useVoiceFlow';
 import { registerScreenFlow } from '../voiceFlows/registerScreenFlow';
 
 export default function Register() {
@@ -22,7 +22,7 @@ export default function Register() {
   const getAppData = useGetAppData();
   const saveAppData = useSaveAppData();
   const handleRouteChange = useHandleRouteChange();
-  const { traverseFlow } = useVoiceFlow();
+  //const { traverseFlow } = useVoiceFlow();
 
   const usernameMinLength = 3;
   const passwordMinLength = 8;
@@ -63,13 +63,13 @@ export default function Register() {
 
   const startVoiceRegisterFlow = async () => {
     const flow = registerScreenFlow(handleRouteChange, handleRegisterCommand);
-    await traverseFlow(flow, 'intro', { login, password, firstname, lastname }, (updatedContext) => {
-      if (updatedContext.login !== undefined) setLogin(updatedContext.login.replace(/\s+/g, ''));
-      if (updatedContext.password !== undefined) setPassword(updatedContext.password.replace(/\s+/g, ''));
-      if (updatedContext.repeatPassword !== undefined) setRepeatPassword(updatedContext.password.replace(/\s+/g, ''));
-      if (updatedContext.firstname !== undefined) setFirstname(updatedContext.firstname);
-      if (updatedContext.lastname !== undefined) setLastname(updatedContext.lastname);
-    });
+    // await traverseFlow(flow, 'intro', { login, password, firstname, lastname }, (updatedContext) => {
+    //   if (updatedContext.login !== undefined) setLogin(updatedContext.login.replace(/\s+/g, ''));
+    //   if (updatedContext.password !== undefined) setPassword(updatedContext.password.replace(/\s+/g, ''));
+    //   if (updatedContext.repeatPassword !== undefined) setRepeatPassword(updatedContext.password.replace(/\s+/g, ''));
+    //   if (updatedContext.firstname !== undefined) setFirstname(updatedContext.firstname);
+    //   if (updatedContext.lastname !== undefined) setLastname(updatedContext.lastname);
+    // });
   };
 
   const handleRegisterCommand = async (login: string, firstname: string, lastname: string, password: string) => {

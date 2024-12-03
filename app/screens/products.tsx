@@ -9,7 +9,7 @@ import { useGetAppData } from '../hooks/useGetAppData';
 import { Screens } from '../enum/screens';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import ChatBubble from '../components/ChatBubble';
-import { useVoiceFlow } from '../hooks/useVoiceFlow';
+//import { useVoiceFlow } from '../hooks/useVoiceFlow';
 import { Category } from '../models/category.model';
 import { productsScreenFlow } from '../voiceFlows/productsScreenFlow';
 
@@ -26,7 +26,7 @@ export default function Products() {
 
   const getAppData = useGetAppData();
   const handleRouteChange = useHandleRouteChange();
-  const { traverseFlow } = useVoiceFlow();
+  //const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -70,7 +70,7 @@ export default function Products() {
     const data = await response.json();
 
     const flow = productsScreenFlow(products, data, handleRouteChange, addToCartCommand);
-    await traverseFlow(flow, 'intro');
+    //await traverseFlow(flow, 'intro');
   };
 
   const handleSearch = (text: string) => {

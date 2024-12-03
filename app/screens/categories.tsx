@@ -9,7 +9,7 @@ import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { useGetAppData } from '../hooks/useGetAppData';
 import ChatBubble from '../components/ChatBubble';
 import { categoriesScreenFlow } from '../voiceFlows/categoriesScreenFlow';
-import { useVoiceFlow } from '../hooks/useVoiceFlow';
+//import { useVoiceFlow } from '../hooks/useVoiceFlow';
 
 export default function Categories() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,7 +20,7 @@ export default function Categories() {
 
   const handleRouteChange = useHandleRouteChange();
   const getAppData = useGetAppData();
-  const { traverseFlow } = useVoiceFlow();
+  //const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -51,7 +51,7 @@ export default function Categories() {
 
   const startVoiceFlow = async (categories: Category[]) => {
     const flow = categoriesScreenFlow(categories, handleRouteChange, router);
-    await traverseFlow(flow, 'intro');
+    //await traverseFlow(flow, 'intro');
   };
 
   const handleSearch = (text: string) => {

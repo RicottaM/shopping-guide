@@ -22,14 +22,7 @@
         "backgroundColor": "#e8fefd"
       },
       "package": "com.anonymous.Shopper",
-      "permissions": [
-        "BLUETOOTH",
-        "BLUETOOTH_ADMIN",
-        "ACCESS_FINE_LOCATION",
-        "BLUETOOTH_SCAN",
-        "BLUETOOTH_CONNECT",
-        "RECORD_AUDIO"
-      ]
+      "permissions": ["BLUETOOTH", "BLUETOOTH_ADMIN", "ACCESS_FINE_LOCATION", "BLUETOOTH_SCAN", "BLUETOOTH_CONNECT", "RECORD_AUDIO"]
     },
     "web": {
       "bundler": "metro",
@@ -44,15 +37,6 @@
           "isBackgroundEnabled": true,
           "modes": ["peripheral", "central"],
           "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to connect to bluetooth devices"
-        }
-      ],
-      [
-        "expo-speech-recognition",
-        {
-          "microphonePermission": "Allow $(PRODUCT_NAME) to use the microphone.",
-          "speechRecognitionPermission": "Allow $(PRODUCT_NAME) to use speech recognition.",
-          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"],
-          "permissions": ["RECORD_AUDIO"]
         }
       ]
     ],

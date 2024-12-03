@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useSaveAppData } from '../hooks/useSaveAppData';
 import { useHandleRouteChange } from '../hooks/useHandleRouteChange';
 import { Screens } from '../enum/screens';
-import { useVoiceFlow } from '../hooks/useVoiceFlow';
+//import { useVoiceFlow } from '../hooks/useVoiceFlow';
 import { loginScreenFlow } from '../voiceFlows/loginScreenFlow';
 
 export default function Login() {
@@ -17,7 +17,7 @@ export default function Login() {
   const router = useRouter();
   const saveAppData = useSaveAppData();
   const handleRouteChange = useHandleRouteChange();
-  const { traverseFlow } = useVoiceFlow();
+  //const { traverseFlow } = useVoiceFlow();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -31,14 +31,14 @@ export default function Login() {
 
   const startVoiceLoginFlow = async () => {
     const flow = loginScreenFlow(handleRouteChange, loginUser);
-    await traverseFlow(flow, 'intro', { email: login, password }, (updatedContext) => {
-      if (updatedContext.email !== undefined) {
-        setLogin(updatedContext.email.replace(/\s+/g, ''));
-      }
-      if (updatedContext.password !== undefined) {
-        setPassword(updatedContext.password.replace(/\s+/g, ''));
-      }
-    });
+    // await traverseFlow(flow, 'intro', { email: login, password }, (updatedContext) => {
+    //   if (updatedContext.email !== undefined) {
+    //     setLogin(updatedContext.email.replace(/\s+/g, ''));
+    //   }
+    //   if (updatedContext.password !== undefined) {
+    //     setPassword(updatedContext.password.replace(/\s+/g, ''));
+    //   }
+    // });
   };
 
   const loginUser = async (email: string, password: string): Promise<boolean> => {
